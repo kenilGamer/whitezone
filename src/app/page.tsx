@@ -1,13 +1,9 @@
-
-import Navbar from "@/components/Navbar";
-import Showcase from "@/components/showcase";
+import Navbar from "@/components/root/Navbar";
+import Showcase from "@/components/root/showcase";
 import React from "react";
-
-// Import Showcase dynamically (disable SSR)
-
 function Page() {
   return (
-    <div className="h-screen w-full bg-amber-300">
+    <div className="h-screen w-full bg-[#FFE893]">
       <Navbar />
       <Showcase />
     </div>
