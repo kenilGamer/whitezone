@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
 
   // Extract role from token
   const role = token?.role || "user"; // Default to "user" if no role is found
-
+   console.log(token, role, url);
   // 🛑 Prevent authenticated users from accessing auth pages
   if (token && ["/sign-in", "/sign-up", "/verify"].includes(url.pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
@@ -23,6 +23,8 @@ export async function middleware(request: NextRequest) {
 
   // 🔒 Restrict admin pages (`/admin`) to users with the "admin" role
   if (url.pathname.startsWith("/admin") && role !== "admin") {
+    console.log("Access denied: User is not an admin.");
+    
     return NextResponse.redirect(new URL("/", request.url)); // Redirect non-admin users to home
   }
 

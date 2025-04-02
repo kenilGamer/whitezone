@@ -28,6 +28,7 @@ const UserSchema: Schema<User> = new Schema({
     enum: ["user", "admin"],
     default: "user",
   },
+  
   createdAt: {
     type: Date,
     default: Date.now,
