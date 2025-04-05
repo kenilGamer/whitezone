@@ -46,27 +46,25 @@ export async function POST(request: Request) {
     );
   }
 }
-
-// Handle PUT requests (Update a product)
 export async function PUT(request: Request) {
   try {
     await dbConnect(); // Ensure the database is connected
 
     const body = await request.json(); // Parse the request body
-    const { _id, name, price, category, image } = body;
+    const { id, showhome } = body;
 
     // Validate the required fields
-    if (!_id || !name || !price || !category || !image) {
+    if (!id || typeof showhome !== 'boolean') {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "Product ID and showhome status are required" },
         { status: 400 }
       );
     }
 
-    // Update the product
+    // Update the showhome status
     const updatedProduct = await Product.findByIdAndUpdate(
-      _id, // Use `_id` to find the product
-      { name, price, category, image },
+      id, // Use `id` to find the product
+      { showhome }, // Update the showhome field
       { new: true } // Return the updated document
     );
 
@@ -79,13 +77,14 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedProduct, { status: 200 });
   } catch (error) {
-    console.error("Error updating product:", error);
+    console.error("Error updating showhome status:", error);
     return NextResponse.json(
-      { error: "Failed to update product" },
+      { error: "Failed to update showhome status" },
       { status: 500 }
     );
   }
 }
+
 export async function DELETE(request: Request) {
   try {
     await dbConnect(); // Ensure the database is connected

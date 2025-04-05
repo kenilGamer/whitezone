@@ -17,6 +17,7 @@ interface Product {
   price: string;
   image: string;
   category: string;
+  showhome: boolean; // Added showhome property
 }
 
 const Showcase = () => {
@@ -37,7 +38,9 @@ const Showcase = () => {
           throw new Error("Failed to fetch products");
         }
         const data = await response.json();
-        setProducts(data);
+        // Filter products to only include those with showhome set to true
+        const filteredProducts = data.filter((product: Product) => product.showhome);
+        setProducts(filteredProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
       }

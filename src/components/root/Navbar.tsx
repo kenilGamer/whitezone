@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { HiShoppingCart } from "react-icons/hi2";
 import { MdOutlineMenu } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
-
+import { FaCircleUser } from "react-icons/fa6";    
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false); // State to toggle mobile menu
 
@@ -31,8 +31,12 @@ function Navbar() {
         {/* Cart Icon and Mobile Menu Toggle */}
         <div className="flex items-center space-x-4">
           <a href="/cart" className="flex items-center">
-            <HiShoppingCart className="text-3xl hover:text-[#FB9EC6] transition" />
+            <HiShoppingCart className="text-3xl hover:text-[#ff81b8] transition" />
           </a>
+          <a href="/profile" className="flex items-center">
+            <FaCircleUser className="text-3xl hover:text-[#ff69a3] transition" />
+          </a>
+          
           <button className="md:hidden text-3xl" onClick={toggleMenu}>
             {isOpen ? <IoMdClose /> : <MdOutlineMenu />}
           </button>
@@ -99,7 +103,7 @@ function Navbar() {
                 onClick={toggleMenu}
               >
                 Shop
-              </a>
+              </a> 
             </li>
             <li>
               <a

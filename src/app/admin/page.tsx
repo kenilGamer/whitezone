@@ -9,6 +9,10 @@ interface Product {
   price: string;
   image: string;
   category: string;
+  showhome?: boolean; // Changed to optional
+  stock?: number; // Added stock property
+  createdAt?: string; // Added createdAt property
+  updatedAt?: string; // Added updatedAt property
 }
 
 const categories = ["T-Shirts", "Hoodies", "Shirts", "Caps"];
@@ -16,14 +20,18 @@ const categories = ["T-Shirts", "Hoodies", "Shirts", "Caps"];
 function Page() {
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [showhome, setShowHome] = useState(false); // Updated variable name to camelCase
   const [form, setForm] = useState<Product>({
     id: "",
     name: "",
     price: "",
     image: "",
     category: "",
+    showhome: false,
+    stock: 0, // Initialize stock
+    createdAt: "", // Initialize createdAt
+    updatedAt: "" // Initialize updatedAt
   });
-
 
   const fetchProducts = async () => {
     try {
@@ -32,13 +40,13 @@ function Page() {
         throw new Error("Failed to fetch products");
       }
       const data = await response.json();
-  
+
       // Map `_id` to `id` for all products
       const mappedProducts = data.map((product: Product) => ({
         ...product,
         id: product._id, // Map `_id` to `id`
       }));
-  
+
       setProducts(mappedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -110,7 +118,7 @@ function Page() {
         }
       }
 
-      setForm({ id: "", name: "", price: "", image: "", category: "" });
+      setForm({ id: "", name: "", price: "", image: "", category: "", showhome: false, stock: 0, createdAt: "", updatedAt: "" });
       fetchProducts(); // Fetch the latest products
     } catch (error) {
       console.error("Error saving product:", error);
@@ -129,19 +137,40 @@ function Page() {
       console.error("Invalid product ID:", id);
       return;
     }
-  
+
     try {
       const response = await fetch(`/api/products?id=${id}`, {
         method: "DELETE",
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to delete product");
       }
-  
+
       fetchProducts(); // Fetch the latest products
     } catch (error) {
       console.error("Error deleting product:", error);
+    }
+  };
+
+  // Update showhome in the database
+  const updateShowHome = async (id: string, showhomeValue: boolean) => {
+    try {
+      const response = await fetch(`/api/products/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, showhome: showhomeValue }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update showhome status");
+      }
+
+      fetchProducts(); // Fetch the latest products
+    } catch (error) {
+      console.error("Error updating showhome status:", error);
     }
   };
 
@@ -155,7 +184,7 @@ function Page() {
       {/* Sidebar and Content */}
       <div className="flex h-full">
         {/* Sidebar */}
-        <aside className="w-64 bg-[#FFE893] shadow-lg p-6">
+        <aside className="w-1/6 bg-[#FFE893] shadow-lg p-6">
           <nav>
             <h2 className="text-xl font-bold text-[#FB9EC6] mb-4">Navigation</h2>
             <ul className="space-y-4">
@@ -314,6 +343,7 @@ function Page() {
                 </h3>
                 <p className="text-gray-700">Category: {product.category}</p>
                 <p className="text-gray-700">Price: {product.price}</p>
+                <p className="text-gray-700">Stock: {product.stock}</p> {/* Display stock */}
                 <div className="mt-4 flex gap-2">
                   <button
                     onClick={() => handleEdit(product)}
@@ -321,6 +351,17 @@ function Page() {
                   >
                     Edit
                   </button>
+                  <button
+                    onClick={() => {
+                      const newShowHomeValue = !showhome;
+                      setShowHome(newShowHomeValue);
+                      updateShowHome(product.id, newShowHomeValue); // Update showhome in the database
+                    }}
+                    className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition"
+                  >
+                    {showhome ? "Hide from Home" : "Show Home"}
+                  </button>
+
                   <button
                     onClick={() => handleDelete(product.id)}
                     className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"

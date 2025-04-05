@@ -46,7 +46,6 @@ export default function SignUpForm() {
     try {
       const response = await axios.post<ApiResponse>("/api/sign-up", data);
       toast.success(response.data.message);
-      // router.push("/dash")
     } catch (error) {
       console.error("Error during sign-up:", error);
 
