@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import GooglePayButton from './GooglePayButton';
@@ -17,16 +17,7 @@ interface PaymentData {
     };
 }
 
-interface ErrorDetails {
-    statusCode: string;
-}
 
-interface PaymentsClient {
-    isReadyToPay(request: object): Promise<{ result: boolean }>;
-    loadPaymentData(paymentData: object): Promise<PaymentData>;
-    createButton(options: { onClick: () => void }): HTMLElement;
-    createPaymentDataRequest(request: object): object;
-}
 
 const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
     const buttonRef = useRef<HTMLDivElement | null>(null);
