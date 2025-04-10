@@ -21,6 +21,13 @@ interface ErrorDetails {
     statusCode: string;
 }
 
+interface PaymentsClient {
+    isReadyToPay(request: object): Promise<{ result: boolean }>;
+    loadPaymentData(paymentData: object): Promise<PaymentData>;
+    createButton(options: { onClick: () => void }): HTMLElement;
+    createPaymentDataRequest(request: object): object;
+}
+
 const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
     const buttonRef = useRef<HTMLDivElement | null>(null);
     const items = useSelector((state: RootState) => state.cart.items);
@@ -30,81 +37,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
     const handleClose = useCallback(() => {
         onClose();
     }, [onClose]);
-
-    useEffect(() => {
-        if (!isOpen || !window.google) return;
-
-        console.log("PaymentMethod isOpen:", isOpen);
-
-        const paymentsClient = new window.google.payments.api.PaymentsClient({
-            environment: 'TEST',
-        });
-
-        // Check if createPaymentDataRequest is a function
-        if (typeof paymentsClient.createPaymentDataRequest !== 'function') {
-            console.error('createPaymentDataRequest is not a function on paymentsClient');
-            return;
-        }
-
-        const paymentRequest = paymentsClient.createPaymentDataRequest({
-            apiVersion: 2,
-            apiVersionMinor: 0,
-            merchantInfo: {
-                merchantId: process.env.NEXT_PUBLIC_GOOGLE_PAY_MERCHANT_ID!,
-                merchantName: 'Your Shop Name',
-            },
-            allowedPaymentMethods: [
-                {
-                    type: 'CARD',
-                    parameters: {
-                        allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-                        allowedCardNetworks: ['MASTERCARD', 'VISA'],
-                    },
-                    tokenizationSpecification: {
-                        type: 'PAYMENT_GATEWAY',
-                        parameters: {
-                            gateway: 'example',
-                            gatewayMerchantId: 'exampleGatewayMerchantId',
-                        },
-                    },
-                },
-            ],
-            transactionInfo: {
-                totalPriceStatus: 'FINAL',
-                totalPrice: total, // Use the total calculated from the cart
-                currencyCode: 'INR',
-                countryCode: 'IN',
-            },
-        });
-
-        paymentsClient.isReadyToPay({ allowedPaymentMethods: paymentRequest.allowedPaymentMethods })
-            .then((response: { result: boolean }) => {
-                if (response.result) {
-                    const button = paymentsClient.createButton({
-                        onClick: () => {
-                            paymentsClient.loadPaymentData(paymentRequest)
-                                .then((paymentData: PaymentData) => {
-                                    console.log('Payment Success:', paymentData);
-                                    alert('Payment Successful!');
-                                    handleClose();
-                                })
-                                .catch((err: ErrorDetails) => {
-                                    console.error('Payment Failed:', err);
-                                    alert('Payment Failed: ' + err.statusCode);
-                                });
-                        },
-                    });
-
-                    if (buttonRef.current) {
-                        buttonRef.current.innerHTML = ''; // Clear previous button
-                        buttonRef.current.appendChild(button); // Insert new one
-                    }
-                }
-            })
-            .catch((err: unknown) => {
-                console.error('Error checking isReadyToPay:', err);
-            });
-    }, [isOpen, total, handleClose]); // Only re-run this effect when `isOpen` becomes true or `total` changes
+ // Only re-run this effect when `isOpen` becomes true or `total` changes
 
     if (!isOpen) return null;
 
