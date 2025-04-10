@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
@@ -11,11 +11,23 @@ interface PaymentMethodProps {
     onClose: () => void;
 }
 
+interface PaymentData {
+    paymentMethodDetails: any;
+}
+
+interface ErrorDetails {
+    statusCode: string;
+}
+
 const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
     const buttonRef = useRef<HTMLDivElement | null>(null);
     const items = useSelector((state: RootState) => state.cart.items);
     const [method, setMethod] = useState<'gpay' | 'paypal' | 'cod'>('gpay');
     const total = items.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0).toFixed(2);
+
+    const handleClose = useCallback(() => {
+        onClose();
+    }, [onClose]);
 
     useEffect(() => {
         if (!isOpen || !window.google) return;
@@ -69,12 +81,12 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
                     const button = paymentsClient.createButton({
                         onClick: () => {
                             paymentsClient.loadPaymentData(paymentRequest)
-                                .then((paymentData: any) => {
+                                .then((paymentData: PaymentData) => {
                                     console.log('Payment Success:', paymentData);
                                     alert('Payment Successful!');
-                                    onClose();
+                                    handleClose();
                                 })
-                                .catch((err: any) => {
+                                .catch((err: ErrorDetails) => {
                                     console.error('Payment Failed:', err);
                                     alert('Payment Failed: ' + err.statusCode);
                                 });
@@ -90,7 +102,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
             .catch((err: unknown) => {
                 console.error('Error checking isReadyToPay:', err);
             });
-    }, [isOpen, total]); // Only re-run this effect when `isOpen` becomes true or `total` changes
+    }, [isOpen, total, handleClose]); // Only re-run this effect when `isOpen` becomes true or `total` changes
 
     if (!isOpen) return null;
 
@@ -99,7 +111,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
             <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-lg font-bold"
                     >
                         ×
@@ -134,53 +146,12 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
                                     // TODO: call your order API with paymentMethod='gpay'
                                     console.log('GPay paymentData', data);
                                     alert('Google Pay successful!');
-                                    onClose();
+                                    handleClose();
                                 }}
                             />
                         </div>
                     )}
                     {/* End of Selection */}
-
-                    {method === 'paypal' && (
-                        <div>
-                            <p className="mb-2 font-medium">Pay ₹{total} with PayPal</p>
-                            <PayPalButtons
-                                style={{ layout: 'vertical' }}
-                                createOrder={(_, actions) =>
-                                    actions.order.create({
-                                        intent: 'CAPTURE',
-                                        purchase_units: [{ amount: { value: total, currency_code: 'INR' } }],
-                                    })
-                                }
-                                onApprove={async (_, actions) => {
-                                    const details = await actions.order!.capture();
-                                    if (details.payer) {
-                                        alert(`Payment completed by ${details.payer.name?.given_name}`);
-                                    } else {
-                                        alert('Payment completed, but payer information is not available.');
-                                    }
-                                    onClose();
-                                }}
-                                onError={(err) => {
-                                    console.error('PayPal error', err);
-                                    alert('PayPal payment failed');
-                                }}
-                            />
-                        </div>
-                    )}
-
-                    {method === 'cod' && (
-                        <button
-                            onClick={() => {
-                                // TODO: call your order API with paymentMethod='cod'
-                                alert('Order placed with Cash on Delivery');
-                                onClose();
-                            }}
-                            className="w-full bg-[#FB9EC6] text-white py-2 rounded hover:bg-[#da004c] transition"
-                        >
-                            Place Order (Cash on Delivery)
-                        </button>
-                    )}
                 </div>
             </div>
         </>

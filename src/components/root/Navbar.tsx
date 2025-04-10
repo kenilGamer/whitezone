@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import { HiShoppingCart } from "react-icons/hi2";
 import { MdOutlineMenu } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
-import { FaCircleUser } from "react-icons/fa6";    
+import { FaCircleUser } from "react-icons/fa6";
+import Link from "next/link";
+
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false); // State to toggle mobile menu
 
@@ -21,11 +23,31 @@ function Navbar() {
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex space-x-6 text-base">
-          <li><a href="/" className="hover:text-[#FB9EC6] transition">Home</a></li>
-          <li><a href="#" className="hover:text-[#FB9EC6] transition">Men</a></li>
-          <li><a href="#" className="hover:text-[#FB9EC6] transition">Women</a></li>
-          <li><a href="#" className="hover:text-[#FB9EC6] transition">Bags</a></li>
-          <li><a href="/shop" className="hover:text-[#FB9EC6] transition">Shop</a></li>
+          <li>
+            <Link href="/" className="hover:text-[#FB9EC6] transition">
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link href="#" className="hover:text-[#FB9EC6] transition">
+              Men
+            </Link>
+          </li>
+          <li>
+            <Link href="#" className="hover:text-[#FB9EC6] transition">
+              Women
+            </Link>
+          </li>
+          <li>
+            <Link href="#" className="hover:text-[#FB9EC6] transition">
+              Bags
+            </Link>
+          </li>
+          <li>
+            <Link href="/shop" className="hover:text-[#FB9EC6] transition">
+              Shop
+            </Link>
+          </li>
         </ul>
 
         {/* Cart Icon and Mobile Menu Toggle */}
@@ -36,7 +58,7 @@ function Navbar() {
           <a href="/profile" className="flex items-center">
             <FaCircleUser className="text-3xl hover:text-[#ff69a3] transition" />
           </a>
-          
+
           <button className="md:hidden text-3xl" onClick={toggleMenu}>
             {isOpen ? <IoMdClose /> : <MdOutlineMenu />}
           </button>
@@ -61,87 +83,43 @@ function Navbar() {
         <div className="flex flex-col justify-center items-center h-full space-y-8">
           <ul className="flex flex-col space-y-6 text-lg text-center">
             <li>
-              <a
+              <Link
                 href="/"
                 className="hover:text-[#FB9EC6] transition"
                 onClick={toggleMenu}
               >
                 Home
-              </a>
+              </Link>
             </li>
+
             <li>
-              <a
-                href="#"
-                className="hover:text-[#FB9EC6] transition"
-                onClick={toggleMenu}
-              >
-                Men
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="hover:text-[#FB9EC6] transition"
-                onClick={toggleMenu}
-              >
-                Women
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="hover:text-[#FB9EC6] transition"
-                onClick={toggleMenu}
-              >
-                Bags
-              </a>
-            </li>
-            <li>
-              <a
+              <Link
                 href="/shop"
                 className="hover:text-[#FB9EC6] transition"
                 onClick={toggleMenu}
               >
                 Shop
-              </a> 
+              </Link>
             </li>
             <li>
-              <a
-                href="/about"
-                className="hover:text-[#FB9EC6] transition"
-                onClick={toggleMenu}
-              >
-                About Us
-              </a>
-            </li>
-            <li>
-              <a
-                href="/accessories"
-                className="hover:text-[#FB9EC6] transition"
-                onClick={toggleMenu}
-              >
-                Accessories
-              </a>
-            </li>
-            <li>
-              <a
+              <Link
                 href="/community"
                 className="hover:text-[#FB9EC6] transition"
                 onClick={toggleMenu}
               >
                 Community
-              </a>
+              </Link>
             </li>
           </ul>
 
           {/* Call-to-Action Button */}
-          <a
+          <Link
             href="/contact"
             className="px-6 py-3 bg-[#FB9EC6] text-white rounded-lg hover:bg-[#da004c] transition"
             onClick={toggleMenu}
           >
             Contact Us
-          </a>
+          </Link>
         </div>
       </div>
     </div>
