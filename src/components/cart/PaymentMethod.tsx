@@ -131,6 +131,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
                             <GooglePayButton
                                 total={parseFloat(total)}
                                 onPaymentAuthorized={(data) => {
+                                    // TODO: call your order API with paymentMethod='gpay'
                                     console.log('GPay paymentData', data);
                                     alert('Google Pay successful!');
                                     onClose();
@@ -138,6 +139,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
                             />
                         </div>
                     )}
+                    {/* End of Selection */}
 
                     {method === 'paypal' && (
                         <div>

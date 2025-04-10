@@ -17,7 +17,6 @@ interface Product {
   price: string;
   image: string;
   category: string;
-  showhome: boolean; // Added showhome property
 }
 
 const Showcase = () => {
@@ -38,9 +37,7 @@ const Showcase = () => {
           throw new Error("Failed to fetch products");
         }
         const data = await response.json();
-        // Filter products to only include those with showhome set to true
-        const filteredProducts = data.filter((product: Product) => product.showhome);
-        setProducts(filteredProducts);
+        setProducts(data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -105,7 +102,8 @@ const Showcase = () => {
           spaceBetween={0}
           slidesPerView={isMobile ? 1 : 3}
           centeredSlides
-          loop
+          // loop
+          loop={products.length > 3}
           mousewheel={true}
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}

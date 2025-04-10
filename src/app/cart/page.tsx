@@ -91,7 +91,9 @@ export default function Page() {
         </div>
       )}
 
+    {cartItems.length > 0 && (
       <PaymentMethod isOpen={isOpen} onClose={() => setOpen(false)} />
+    )}
     </div>
   );
 }
