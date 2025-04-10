@@ -21,7 +21,7 @@ interface Product {
 
 const Showcase = () => {
   const dispatch = useDispatch();
-  const swiperRef = useRef<any>(null);
+  const swiperRef = useRef<Swiper | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -102,7 +102,6 @@ const Showcase = () => {
           spaceBetween={0}
           slidesPerView={isMobile ? 1 : 3}
           centeredSlides
-          // loop
           loop={products.length > 3}
           mousewheel={true}
           onSwiper={(swiper) => (swiperRef.current = swiper)}

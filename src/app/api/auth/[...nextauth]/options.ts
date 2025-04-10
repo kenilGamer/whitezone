@@ -1,9 +1,18 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import bcrypt from "bcryptjs";
 import UserModel from "@/model/user";
 import dbConnect from "@/lib/db-connect";
+
+// Define an interface for the credentials
+
+// Extend the User type from next-auth
+interface User extends NextAuthUser {
+  id: string; // Add the id property
+  _id: string; // Keep _id if you need it
+  role: string;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,13 +24,20 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: any): Promise<any> {
+      async authorize(credentials: Record<"username" | "email" | "password", string> | undefined): Promise<User | null> {
         await dbConnect();
+        if (!credentials) {
+          throw new Error("No credentials provided");
+        }
+
+        const { username, email, password } = credentials;
+        const identifier = username || email; // Use either username or email
+
         try {
           const user = await UserModel.findOne({
             $or: [
-              { email: credentials.identifier },
-              { username: credentials.identifier },
+              { email: identifier },
+              { username: identifier },
             ],
           });
 
@@ -34,12 +50,19 @@ export const authOptions: NextAuthOptions = {
           }
 
           const isPasswordCorrect = await bcrypt.compare(
-            credentials.password,
+            password,
             user.password
           );
 
           if (isPasswordCorrect) {
-            return user;
+            return {
+              id: user._id.toString(), // Add the id property
+              _id: user._id.toString(),
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              // Include any other necessary fields
+            } as User; // Cast to User type
           } else {
             throw new Error("Incorrect password");
           }

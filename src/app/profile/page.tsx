@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
-import { useRouter } from 'next/router'; // Import useRouter for navigation
 
 // Define the Order interface
 interface Order {

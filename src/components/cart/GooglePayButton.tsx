@@ -2,15 +2,57 @@
 
 import React, { useEffect } from "react";
 
+// Define types for payment data and error
+interface PaymentData {
+  paymentMethodData: {
+    // Define properties based on the expected structure
+    // Example: token: string;
+    token: string;
+    type: string;
+    info: {
+      cardDetails: {
+        cardNumber: string;
+        expirationDate: string;
+        cardHolderName: string;
+      };
+    };
+    tokenizationData: {
+      token: string;
+      type: string;
+    };
+    
+  };
+}
+
+interface GooglePayError {
+  code: string;
+  message: string;
+}
+
+// Define the structure of the Google API
+interface PaymentsClient {
+  isReadyToPay(request: object): Promise<{ result: boolean }>;
+  loadPaymentData(paymentData: object): Promise<PaymentData>;
+  createButton(options: { onClick: () => void }): HTMLElement;
+}
+
+interface GoogleAPI {
+  payments: {
+    api: {
+      PaymentsClient: new (options: { environment: string }) => PaymentsClient;
+    };
+  };
+}
+
 declare global {
   interface Window {
-    google: any;
+    google: GoogleAPI; // Use the defined interface
   }
 }
 
 interface GooglePayButtonProps {
   total: number;
-  onPaymentAuthorized: (data: any) => void;
+  onPaymentAuthorized: (data: PaymentData) => void; // Use the specific type here
 }
 
 const GooglePayButton: React.FC<GooglePayButtonProps> = ({ total, onPaymentAuthorized }) => {
@@ -28,7 +70,7 @@ const GooglePayButton: React.FC<GooglePayButtonProps> = ({ total, onPaymentAutho
         {
           type: "CARD",
           parameters: {
-            allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"], // Corrected to only include valid methods
+            allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
             allowedCardNetworks: ["VISA", "MASTERCARD"],
           },
           tokenizationSpecification: {
@@ -50,7 +92,7 @@ const GooglePayButton: React.FC<GooglePayButtonProps> = ({ total, onPaymentAutho
       },
       transactionInfo: {
         totalPriceStatus: "FINAL",
-        totalPrice: total.toFixed(2), // Ensure total is a string with two decimal places
+        totalPrice: total.toFixed(2),
         currencyCode: "INR",
         countryCode: "IN",
       },
@@ -59,14 +101,14 @@ const GooglePayButton: React.FC<GooglePayButtonProps> = ({ total, onPaymentAutho
     const onGooglePayClicked = () => {
       paymentsClient.loadPaymentData(paymentDataRequest)
         .then(onPaymentAuthorized)
-        .catch((err: any) => {
+        .catch((err: GooglePayError) => {
           console.error("Google Pay error:", err);
           alert("Google Pay failed. Please try another payment method.");
         });
     };
 
     paymentsClient.isReadyToPay(isReadyToPayRequest)
-      .then((res: any) => {
+      .then((res: { result: boolean }) => {
         if (res.result && !document.getElementById("gpay-button")?.hasChildNodes()) {
           const button = paymentsClient.createButton({ onClick: onGooglePayClicked });
           document.getElementById("gpay-button")?.appendChild(button);

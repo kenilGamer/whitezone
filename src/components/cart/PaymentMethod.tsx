@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { PayPalButtons } from '@paypal/react-paypal-js';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import GooglePayButton from './GooglePayButton';
@@ -12,7 +11,10 @@ interface PaymentMethodProps {
 }
 
 interface PaymentData {
-    paymentMethodDetails: any;
+    paymentMethodDetails: {
+        type: string;
+        details: Record<string, unknown>;
+    };
 }
 
 interface ErrorDetails {
