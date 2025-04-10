@@ -10,12 +10,6 @@ interface PaymentMethodProps {
     onClose: () => void;
 }
 
-interface PaymentData {
-    paymentMethodDetails: {
-        type: string;
-        details: Record<string, unknown>;
-    };
-}
 
 
 
