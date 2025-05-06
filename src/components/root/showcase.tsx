@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, EffectCoverflow, Mousewheel } from "swiper/modules";
+import { Swiper as SwiperType } from 'swiper';
 import { motion } from "framer-motion";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -21,7 +22,7 @@ interface Product {
 
 const Showcase = () => {
   const dispatch = useDispatch();
-  const swiperRef = useRef<Swiper | null>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
