@@ -8,6 +8,12 @@ This document provides an overview of the API endpoints available in this projec
   - **Request**: Send credentials in the request body.
   - **Response**: Returns a session token upon successful authentication.
 
+## Google Login
+
+- **POST /api/auth/google**: Handles Google authentication.
+  - **Request**: Send Google credentials in the request body.
+  - **Response**: Returns a session token upon successful authentication.
+
 ## Products
 
 - **GET /api/products**: Retrieves a list of products.
