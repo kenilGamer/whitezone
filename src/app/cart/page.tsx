@@ -92,7 +92,15 @@ export default function Page() {
       )}
 
     {cartItems.length > 0 && (
-      <PaymentMethod isOpen={isOpen} onClose={() => setOpen(false)} />
+      <PaymentMethod 
+        isOpen={isOpen} 
+        onClose={() => setOpen(false)}
+        onPaymentComplete={() => {
+          setOpen(false);
+          setMsg('Payment processed successfully!');
+          setTimeout(() => setMsg(''), 3000);
+        }}
+      />
     )}
     </div>
   );

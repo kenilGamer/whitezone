@@ -75,6 +75,8 @@ export default function Navbar({ onCartClick, onWishlistClick, onProfileClick }:
                 <Image
                   src={session.user?.image || '/default-avatar.png'}
                   alt="Profile"
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full"
                 />
               </button>
