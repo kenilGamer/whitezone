@@ -5,6 +5,8 @@ import { useSession, signIn } from "next-auth/react";
 import { useLoading } from "@/context/loading-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaShoppingBag, FaHeart, FaUser, FaEnvelope, FaEdit, FaCamera } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useFetch } from "@/hooks/useFetch";
 
 // Define the Order interface
 interface Order {

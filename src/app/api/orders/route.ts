@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     await dbConnect();
 
     // Build query
-    const query: any = { userId };
+    const query: Record<string, string> = { userId };
     if (status) {
       query.status = status;
     }

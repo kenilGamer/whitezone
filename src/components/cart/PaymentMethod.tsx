@@ -9,9 +9,12 @@ import { useLoading } from '@/context/loading-context';
 interface PaymentMethodProps {
     isOpen: boolean;
     onClose: () => void;
+    onSelect: (method: string) => void;
+    selectedMethod: string;
+    error?: string;
 }
 
-const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
+const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose, onSelect, selectedMethod, error }) => {
     const buttonRef = useRef<HTMLDivElement | null>(null);
     const items = useSelector((state: RootState) => state.cart.items);
     const [method, setMethod] = useState<'gpay' | 'paypal' | 'cod'>('gpay');
@@ -45,6 +48,10 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
         } finally {
             stopLoading();
         }
+    };
+
+    const handleMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onSelect(e.target.value);
     };
 
     if (!isOpen) return null;

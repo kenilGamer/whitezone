@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import Product from "@/model/Products";
 import dbConnect from "@/lib/db-connect";
-import { headers } from 'next/headers';
 
 // Cache duration in seconds
 const CACHE_DURATION = 60;
@@ -18,7 +17,7 @@ export async function GET(request: Request) {
     await dbConnect();
 
     // Build query
-    const query: any = {};
+    const query: Record<string, string> = {};
     if (category) {
       query.category = category;
     }

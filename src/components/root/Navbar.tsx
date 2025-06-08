@@ -8,8 +8,18 @@ import { useSelector } from "react-redux";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
-function Navbar() {
+interface NavbarProps {
+  onCartClick: () => void;
+  onWishlistClick: () => void;
+  onProfileClick: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onCartClick, onWishlistClick, onProfileClick }) => {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -42,6 +52,10 @@ function Navbar() {
 
   const isActive = (path: string) => {
     return pathname === path;
+  };
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
   };
 
   return (
@@ -229,6 +243,6 @@ function Navbar() {
       </AnimatePresence>
     </motion.div>
   );
-}
+};
 
 export default Navbar;

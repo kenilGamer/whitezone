@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface Product {
   _id?: string;
@@ -333,11 +335,14 @@ function Page() {
                 key={index}
                 className="bg-[#FFE893] p-6 rounded-lg shadow-md hover:shadow-lg transition"
               >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-40 object-contain mb-4 rounded-lg"
-                />
+                <div className="relative w-full h-40 mb-4">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-contain rounded-lg"
+                  />
+                </div>
                 <h3 className="text-xl font-bold text-[#FB9EC6] mb-2">
                   {product.name}
                 </h3>

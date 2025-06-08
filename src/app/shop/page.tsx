@@ -62,7 +62,11 @@ function Page() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6E0] to-[#FFE893] flex flex-col">
-      <Navbar />
+      <Navbar 
+        onCartClick={() => startLoading('Opening cart...')}
+        onWishlistClick={() => startLoading('Opening wishlist...')}
+        onProfileClick={() => startLoading('Opening profile...')}
+      />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar onSearch={setSearchQuery} />
         <div className="flex-1 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-y-auto">
