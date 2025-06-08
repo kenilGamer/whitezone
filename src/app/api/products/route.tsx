@@ -91,20 +91,35 @@ export async function PUT(request: Request) {
   try {
     await dbConnect();
 
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const body = await request.json();
-    const { id, showhome } = body;
 
-    if (!id || typeof showhome !== 'boolean') {
+    if (!id) {
       return NextResponse.json(
-        { error: "Product ID and showhome status are required" },
+        { error: "Product ID is required" },
         { status: 400 }
       );
+    }
+
+    // Convert string values to appropriate types
+    if (body.price) {
+      body.price = parseFloat(body.price);
+    }
+    if (body.stock) {
+      body.stock = parseInt(body.stock);
+    }
+    if (body.discount) {
+      body.discount = parseFloat(body.discount);
+    }
+    if (body.weight) {
+      body.weight = parseFloat(body.weight);
     }
 
     // Use findOneAndUpdate for better atomicity
     const updatedProduct = await Product.findOneAndUpdate(
       { _id: id },
-      { $set: { showhome } },
+      { $set: body },
       { 
         new: true,
         runValidators: true
@@ -123,9 +138,9 @@ export async function PUT(request: Request) {
     response.headers.set('Cache-Control', 'no-store');
     return response;
   } catch (error) {
-    console.error("Error updating showhome status:", error);
+    console.error("Error updating product:", error);
     return NextResponse.json(
-      { error: "Failed to update showhome status" },
+      { error: "Failed to update product" },
       { status: 500 }
     );
   }
