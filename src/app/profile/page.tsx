@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useSession } from "next-auth/react";
-import { FaShoppingBag, FaHeart, FaEnvelope, FaEdit, FaCamera } from "react-icons/fa";
+import { useSession, signOut } from "next-auth/react";
+import { FaShoppingBag, FaHeart, FaEnvelope, FaEdit, FaCamera, FaSignOutAlt } from "react-icons/fa";
 import { useLoading } from "@/context/loading-context";
 import { signIn } from "next-auth/react";
 import Image from 'next/image';
@@ -268,12 +268,22 @@ function Page() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-gray-800">{session?.user?.username}</h2>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="p-2 text-gray-600 hover:text-[#FB9EC6] transition-colors"
-                    >
-                      <FaEdit className="text-xl" />
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="p-2 text-gray-600 hover:text-[#FB9EC6] transition-colors"
+                        title="Edit Profile"
+                      >
+                        <FaEdit className="text-xl" />
+                      </button>
+                      <button
+                        onClick={() => signOut({ callbackUrl: '/' })}
+                        className="p-2 text-gray-600 hover:text-red-500 transition-colors"
+                        title="Sign Out"
+                      >
+                        <FaSignOutAlt className="text-xl" />
+                      </button>
+                    </div>
                   </div>
                   <div className="flex items-center space-x-2 text-gray-600">
                     <FaEnvelope className="text-lg" />
