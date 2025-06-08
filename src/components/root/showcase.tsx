@@ -30,7 +30,15 @@ const Showcase = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Use the useFetch hook to fetch products
-  const { data: products = [], error } = useFetch<Product[]>("/api/products");
+  const { data: response = { products: [] }, error } = useFetch<{ products: Product[], pagination: { total: number, page: number, limit: number, pages: number } }>("/api/products");
+
+  // Add debugging
+  React.useEffect(() => {
+    if (response) {
+      console.log('Products data:', response);
+      console.log('Products type:', typeof response);
+    }
+  }, [response]);
 
   const handleAddToCart = (product: Product) => {
     if (!product._id) {
@@ -81,7 +89,7 @@ const Showcase = () => {
     );
   }
 
-  if (!products || products.length === 0) {
+  if (!response?.products || response.products.length === 0) {
     return (
       <div className="flex items-center justify-center h-[90vh]">
         <p className="text-gray-500">No products available</p>
@@ -103,7 +111,7 @@ const Showcase = () => {
           spaceBetween={0}
           slidesPerView={isMobile ? 1 : 3}
           centeredSlides
-          loop={products.length > 3}
+          loop={response?.products?.length > 3}
           mousewheel={true}
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
@@ -116,7 +124,7 @@ const Showcase = () => {
           }}
           className="w-full max-w-4xl"
         >
-          {products.map((product, index) => (
+          {response?.products?.map((product, index) => (
             <SwiperSlide
               key={product._id}
               className="flex flex-col items-center justify-center w-full h-[80vh] bg-[#eaf07f] rounded-3xl shadow-lg transition-transform duration-300 p-5"
@@ -184,8 +192,8 @@ const Showcase = () => {
         </button>
 
         <div className="min-w-[200px] text-center">
-          <p className="text-xl font-semibold">{products[activeIndex]?.name}</p>
-          <p className="text-lg">${products[activeIndex]?.price}</p>
+          <p className="text-xl font-semibold">{response?.products?.[activeIndex]?.name}</p>
+          <p className="text-lg">${response?.products?.[activeIndex]?.price}</p>
         </div>
 
         <button

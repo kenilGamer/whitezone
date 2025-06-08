@@ -1,0 +1,6 @@
+{
+  "default_applications": ["https://pay.google.com/gp/p/payment_method_manifest.json"],
+  "supported_origins": [
+    "https://pay.google.com"
+  ]
+} 

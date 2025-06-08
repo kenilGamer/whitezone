@@ -42,7 +42,7 @@ function Page() {
       const data = await response.json();
 
       // Map `_id` to `id` for all products
-      const mappedProducts = data.map((product: Product) => ({
+      const mappedProducts = data.products.map((product: Product) => ({
         ...product,
         id: product._id, // Map `_id` to `id`
       }));

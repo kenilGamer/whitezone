@@ -19,6 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="payment-manifest" href="/payment-manifest.json" />
+        <meta name="theme-color" content="#FB9EC6" />
         <Script
           src="https://pay.google.com/gp/p/js/pay.js"
           strategy="beforeInteractive"

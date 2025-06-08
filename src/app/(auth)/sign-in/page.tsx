@@ -41,15 +41,16 @@ export default function SignInForm() {
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     const result = await signIn("credentials", {
       redirect: false,
-      identifier: data.identifier,
+      username: data.identifier,
+      email: data.identifier,
       password: data.password,
     });
 
     if (result?.error) {
       if (result.error === "CredentialsSignin") {
-        toast("Incorrect Credentials");
+        toast.error("Incorrect Credentials");
       } else {
-        toast(result.error);
+        toast.error(result.error);
       }
     }
 

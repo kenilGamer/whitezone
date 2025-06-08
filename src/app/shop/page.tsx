@@ -39,7 +39,7 @@ function Page() {
         updateProgress(60);
         const data = await response.json();
         updateProgress(90);
-        setProducts(data);
+        setProducts(data.products);
         updateProgress(100);
         await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {

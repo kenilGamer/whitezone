@@ -1,0 +1,23 @@
+{
+  "name": "WhiteZone",
+  "short_name": "WhiteZone",
+  "description": "Your premium fashion destination",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FCFFC1",
+  "theme_color": "#FB9EC6",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+} 

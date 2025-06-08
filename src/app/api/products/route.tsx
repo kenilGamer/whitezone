@@ -1,13 +1,54 @@
 import { NextResponse } from "next/server";
 import Product from "@/model/Products";
-import dbConnect  from "@/lib/db-connect";
+import dbConnect from "@/lib/db-connect";
+import { headers } from 'next/headers';
+
+// Cache duration in seconds
+const CACHE_DURATION = 60;
 
 // Handle GET requests to fetch all products
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    await dbConnect(); // Connect to the database
-    const products = await Product.find(); // Fetch all products
-    return NextResponse.json(products, { status: 200 });
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const category = searchParams.get('category');
+    const sort = searchParams.get('sort') || '-createdAt';
+
+    await dbConnect();
+
+    // Build query
+    const query: any = {};
+    if (category) {
+      query.category = category;
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Execute query with pagination
+    const [products, total] = await Promise.all([
+      Product.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Product.countDocuments(query)
+    ]);
+
+    // Create response with cache headers
+    const response = NextResponse.json({
+      products,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    }, { status: 200 });
+
+    response.headers.set('Cache-Control', `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate`);
+    return response;
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json(
@@ -46,14 +87,14 @@ export async function POST(request: Request) {
     );
   }
 }
+
 export async function PUT(request: Request) {
   try {
-    await dbConnect(); // Ensure the database is connected
+    await dbConnect();
 
-    const body = await request.json(); // Parse the request body
+    const body = await request.json();
     const { id, showhome } = body;
 
-    // Validate the required fields
     if (!id || typeof showhome !== 'boolean') {
       return NextResponse.json(
         { error: "Product ID and showhome status are required" },
@@ -61,11 +102,14 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Update the showhome status
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id, // Use `id` to find the product
-      { showhome }, // Update the showhome field
-      { new: true } // Return the updated document
+    // Use findOneAndUpdate for better atomicity
+    const updatedProduct = await Product.findOneAndUpdate(
+      { _id: id },
+      { $set: { showhome } },
+      { 
+        new: true,
+        runValidators: true
+      }
     );
 
     if (!updatedProduct) {
@@ -75,7 +119,10 @@ export async function PUT(request: Request) {
       );
     }
 
-    return NextResponse.json(updatedProduct, { status: 200 });
+    // Create response with no-cache headers
+    const response = NextResponse.json(updatedProduct, { status: 200 });
+    response.headers.set('Cache-Control', 'no-store');
+    return response;
   } catch (error) {
     console.error("Error updating showhome status:", error);
     return NextResponse.json(
