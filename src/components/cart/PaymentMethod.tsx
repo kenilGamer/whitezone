@@ -1,10 +1,7 @@
 'use client';
 
-import React, { useRef, useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/store';
-import GooglePayButton from './GooglePayButton';
-import { useLoading } from '@/context/loading-context';
+import React, { useRef, useEffect } from 'react';
+import { FaCreditCard, FaPaypal } from 'react-icons/fa';
 
 interface PaymentMethodProps {
     isOpen: boolean;
@@ -12,109 +9,80 @@ interface PaymentMethodProps {
     onSelect: (method: string) => void;
     selectedMethod: string;
     error?: string;
+    onPaymentComplete: () => void;
 }
 
-const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose, onSelect, selectedMethod, error }) => {
-    const buttonRef = useRef<HTMLDivElement | null>(null);
-    const items = useSelector((state: RootState) => state.cart.items);
-    const [method, setMethod] = useState<'gpay' | 'paypal' | 'cod'>('gpay');
-    const total = items.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0).toFixed(2);
-    const { startLoading, stopLoading, updateProgress } = useLoading();
+const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose, onSelect, selectedMethod, error, onPaymentComplete }) => {
+    const buttonRef = useRef<HTMLDivElement>(null);
 
-    const handleClose = useCallback(() => {
-        onClose();
-    }, [onClose]);
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
 
-    const handlePayment = async (data: any) => {
-        startLoading('Processing payment...');
-        try {
-            // Simulate payment processing
-            updateProgress(30);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            updateProgress(60);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            updateProgress(90);
-            
-            // TODO: call your order API with paymentMethod='gpay'
-            console.log('Payment data', data);
-            
-            updateProgress(100);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            alert('Payment successful!');
-            handleClose();
-        } catch (error) {
-            console.error('Payment error:', error);
-            alert('Payment failed. Please try again.');
-        } finally {
-            stopLoading();
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
         }
-    };
 
-    const handleMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onSelect(e.target.value);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isOpen, onClose]);
+
+    const handlePayment = async (paymentType: 'card' | 'paypal') => {
+        try {
+            // Implement payment logic here
+            console.log(`Processing ${paymentType} payment...`);
+            onPaymentComplete();
+        } catch (error) {
+            console.error('Payment failed:', error);
+        }
     };
 
     if (!isOpen) return null;
 
     return (
-        <>
-            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
-                    <button
-                        onClick={handleClose}
-                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-lg font-bold"
-                    >
-                        ×
-                    </button>
-                    <h2 className="text-2xl font-semibold mb-4 text-center text-[#FB9EC6]">Choose Payment Method</h2>
-                    <div ref={buttonRef} className="flex justify-center" />
-
-                    {/* Tabs */}
-                    <div className="flex justify-around mb-6">
-                        {(['gpay', 'paypal', 'cod'] as const).map((m) => (
-                            <button
-                                key={m}
-                                onClick={() => setMethod(m)}
-                                className={`px-4 py-2 rounded ${method === m ? 'bg-[#FB9EC6] text-white' : 'bg-gray-200'
-                                    }`}
-                            >
-                                {m === 'gpay'
-                                    ? 'Google Pay'
-                                    : m === 'paypal'
-                                        ? 'PayPal'
-                                        : 'Cash on Delivery'}
-                            </button>
-                        ))}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div ref={buttonRef} className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+                <h2 className="text-2xl font-bold mb-4">Select Payment Method</h2>
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-800">Payment Method</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={() => handlePayment('card')}
+                            className="flex items-center justify-center space-x-2 p-4 border border-gray-200 rounded-lg hover:border-[#FB9EC6] hover:bg-[#FB9EC6]/5 transition-colors"
+                        >
+                            <FaCreditCard className="w-6 h-6 text-[#FB9EC6]" />
+                            <span>Credit Card</span>
+                        </button>
+                        <button
+                            onClick={() => handlePayment('paypal')}
+                            className="flex items-center justify-center space-x-2 p-4 border border-gray-200 rounded-lg hover:border-[#FB9EC6] hover:bg-[#FB9EC6]/5 transition-colors"
+                        >
+                            <FaPaypal className="w-6 h-6 text-[#FB9EC6]" />
+                            <span>PayPal</span>
+                        </button>
                     </div>
-
-                    {/* Content */}
-                    {method === 'gpay' && (
-                        <div className="flex justify-center">
-                            <GooglePayButton
-                                total={parseFloat(total)}
-                                onPaymentAuthorized={handlePayment}
-                            />
-                        </div>
-                    )}
-                    {method === 'paypal' && (
-                        <div className="text-center">
-                            <p className="text-gray-600 mb-4">PayPal integration coming soon...</p>
-                        </div>
-                    )}
-                    {method === 'cod' && (
-                        <div className="text-center">
-                            <p className="text-gray-600 mb-4">Cash on Delivery is available for this order.</p>
-                            <button
-                                onClick={() => handlePayment({ method: 'cod' })}
-                                className="px-6 py-2 bg-[#FB9EC6] text-white rounded-lg hover:bg-[#da004c] transition"
-                            >
-                                Place Order
-                            </button>
-                        </div>
-                    )}
+                </div>
+                <div className="mt-6 flex justify-end space-x-4">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={() => onSelect(selectedMethod)}
+                        className="px-4 py-2 bg-[#FB9EC6] text-white rounded hover:bg-[#ff2885]"
+                    >
+                        Confirm
+                    </button>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

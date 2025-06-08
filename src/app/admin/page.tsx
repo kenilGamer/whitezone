@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface Product {
@@ -308,10 +307,12 @@ function Page() {
                 {form.image && (
                   <div className="mt-4">
                     <p className="text-sm text-gray-700 mb-2">Image Preview:</p>
-                    <img
+                    <Image
                       src={form.image}
                       alt="Product Preview"
-                      className="w-full h-40 object-contain rounded-lg border"
+                      width={100}
+                      height={100}
+                      className="w-24 h-24 object-cover rounded-lg"
                     />
                   </div>
                 )}
@@ -339,8 +340,9 @@ function Page() {
                   <Image
                     src={product.image}
                     alt={product.name}
-                    fill
-                    className="object-contain rounded-lg"
+                    width={100}
+                    height={100}
+                    className="w-24 h-24 object-cover rounded-lg"
                   />
                 </div>
                 <h3 className="text-xl font-bold text-[#FB9EC6] mb-2">

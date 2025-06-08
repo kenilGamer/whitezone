@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useSession, signIn } from "next-auth/react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
+import { FaShoppingBag, FaHeart, FaEnvelope, FaEdit, FaCamera } from "react-icons/fa";
 import { useLoading } from "@/context/loading-context";
-import { motion, AnimatePresence } from "framer-motion";
-import { FaShoppingBag, FaHeart, FaUser, FaEnvelope, FaEdit, FaCamera } from "react-icons/fa";
-import { useRouter } from "next/navigation";
-import { useFetch } from "@/hooks/useFetch";
+import { signIn } from "next-auth/react";
+import Image from 'next/image';
 
 // Define the Order interface
 interface Order {
@@ -202,17 +202,13 @@ function Page() {
           <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
             <div className="relative group">
               <div className="w-32 h-32 bg-gradient-to-br from-[#FB9EC6] to-[#ff2885] rounded-full flex items-center justify-center overflow-hidden">
-                {editForm.image ? (
-                  <img
-                    src={editForm.image}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-4xl text-white font-bold">
-                    {editForm.username?.[0]?.toUpperCase() || 'U'}
-                  </span>
-                )}
+                <Image
+                  src={session.user?.image || '/default-avatar.png'}
+                  alt="Profile"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                />
               </div>
               {isEditing && (
                 <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
@@ -363,9 +359,11 @@ function Page() {
                   className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow"
                 >
                   <div className="flex space-x-4">
-                    <img
+                    <Image
                       src={item.image}
                       alt={item.name}
+                      width={80}
+                      height={80}
                       className="w-20 h-20 object-cover rounded-lg"
                     />
                     <div className="flex-1">

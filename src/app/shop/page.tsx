@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useLoading } from "@/context/loading-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaShoppingCart, FaHeart, FaSearch, FaFilter } from "react-icons/fa";
+import Image from 'next/image';
 
 interface Product {
   _id?: string;
@@ -137,9 +138,11 @@ function Page() {
                 >
                   {/* Product Image Container */}
                   <div className="relative overflow-hidden rounded-t-xl aspect-square bg-gray-50">
-                    <img
+                    <Image
                       src={product.image}
                       alt={product.name}
+                      width={400}
+                      height={400}
                       className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                     />
                     {/* Quick Actions */}
