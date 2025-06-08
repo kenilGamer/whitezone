@@ -109,7 +109,7 @@ export default function SignInForm() {
             <p>
               Do not have an account{" "}
               <Link
-                href="/sign-up"
+                href="/signup"
                 className="text-blue-600 hover:text-blue-800"
               >
                 Register

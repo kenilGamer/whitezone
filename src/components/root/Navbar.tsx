@@ -82,7 +82,7 @@ export default function Navbar({ onCartClick, onWishlistClick, onProfileClick }:
               </button>
             ) : (
               <Link
-                href="/auth/signin"
+                href="/signin"
                 className="px-4 py-2 text-[#FB9EC6] hover:text-[#ff2885] transition-colors"
               >
                 Sign In
