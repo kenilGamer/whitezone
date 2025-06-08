@@ -6,6 +6,7 @@ export interface User {
   email: string;
   password?: string;
   role: "user" | "admin";
+  image?: string;
   createdAt?: Date;
 }
 
@@ -28,7 +29,9 @@ const UserSchema: Schema<User> = new Schema({
     enum: ["user", "admin"],
     default: "user",
   },
-  
+  image: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -4,25 +4,48 @@ import React, { useRef, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import GooglePayButton from './GooglePayButton';
+import { useLoading } from '@/context/loading-context';
 
 interface PaymentMethodProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-
-
-
 const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
     const buttonRef = useRef<HTMLDivElement | null>(null);
     const items = useSelector((state: RootState) => state.cart.items);
     const [method, setMethod] = useState<'gpay' | 'paypal' | 'cod'>('gpay');
     const total = items.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0).toFixed(2);
+    const { startLoading, stopLoading, updateProgress } = useLoading();
 
     const handleClose = useCallback(() => {
         onClose();
     }, [onClose]);
- // Only re-run this effect when `isOpen` becomes true or `total` changes
+
+    const handlePayment = async (data: any) => {
+        startLoading('Processing payment...');
+        try {
+            // Simulate payment processing
+            updateProgress(30);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            updateProgress(60);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            updateProgress(90);
+            
+            // TODO: call your order API with paymentMethod='gpay'
+            console.log('Payment data', data);
+            
+            updateProgress(100);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            alert('Payment successful!');
+            handleClose();
+        } catch (error) {
+            console.error('Payment error:', error);
+            alert('Payment failed. Please try again.');
+        } finally {
+            stopLoading();
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -49,10 +72,10 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
                                     }`}
                             >
                                 {m === 'gpay'
-                                    ? 'Google Pay'
+                                    ? 'Google Pay'
                                     : m === 'paypal'
                                         ? 'PayPal'
-                                        : 'Cash on Delivery'}
+                                        : 'Cash on Delivery'}
                             </button>
                         ))}
                     </div>
@@ -62,16 +85,26 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ isOpen, onClose }) => {
                         <div className="flex justify-center">
                             <GooglePayButton
                                 total={parseFloat(total)}
-                                onPaymentAuthorized={(data) => {
-                                    // TODO: call your order API with paymentMethod='gpay'
-                                    console.log('GPay paymentData', data);
-                                    alert('Google Pay successful!');
-                                    handleClose();
-                                }}
+                                onPaymentAuthorized={handlePayment}
                             />
                         </div>
                     )}
-                    {/* End of Selection */}
+                    {method === 'paypal' && (
+                        <div className="text-center">
+                            <p className="text-gray-600 mb-4">PayPal integration coming soon...</p>
+                        </div>
+                    )}
+                    {method === 'cod' && (
+                        <div className="text-center">
+                            <p className="text-gray-600 mb-4">Cash on Delivery is available for this order.</p>
+                            <button
+                                onClick={() => handlePayment({ method: 'cod' })}
+                                className="px-6 py-2 bg-[#FB9EC6] text-white rounded-lg hover:bg-[#da004c] transition"
+                            >
+                                Place Order
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </>

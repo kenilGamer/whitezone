@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, EffectCoverflow, Mousewheel } from "swiper/modules";
 import type { Swiper as SwiperCore } from 'swiper/types';
@@ -10,6 +10,7 @@ import "swiper/css/pagination";
 import "swiper/css/effect-coverflow";
 import { useDispatch } from "react-redux";
 import { addItem } from "@/redux/cartSlice";
+import { useFetch } from "@/hooks/useFetch";
 
 interface Product {
   _id?: string;
@@ -23,48 +24,31 @@ interface Product {
 const Showcase = () => {
   const dispatch = useDispatch();
   const swiperRef = useRef<SwiperCore | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Fetch products from the API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch("/api/products");
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-        const data = await response.json();
-        setProducts(data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+  // Use the useFetch hook to fetch products
+  const { data: products = [], error } = useFetch<Product[]>("/api/products");
 
   const handleAddToCart = (product: Product) => {
     if (!product._id) {
       console.error("Product ID is undefined. Cannot add to cart.");
-      return; // Exit if the product ID is not defined
+      return;
     }
 
     dispatch(addItem({
-      id: product._id, // Ensure this is a valid string
+      id: product._id,
       name: product.name,
       price: product.price,
       image: product.image,
       category: product.category,
       quantity: 1
     }));
-
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -88,6 +72,22 @@ const Showcase = () => {
   const handleMouseLeave = () => {
     setHoveredIndex(null);
   };
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[90vh]">
+        <p className="text-red-500">Error loading products: {error.message}</p>
+      </div>
+    );
+  }
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[90vh]">
+        <p className="text-gray-500">No products available</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -144,7 +144,7 @@ const Showcase = () => {
                   onMouseLeave={handleMouseLeave}
                 />
               </motion.div>
-              <div className="flex justify-center items-center ">
+              <div className="flex justify-center items-center">
                 <button
                   onClick={() => handleAddToCart(product)}
                   className="px-6 py-2 bg-[#FB9EC6] text-white rounded-lg hover:bg-[#da004c] transition"
