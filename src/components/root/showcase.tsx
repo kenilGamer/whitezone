@@ -11,17 +11,9 @@ import "swiper/css/effect-coverflow";
 import { useDispatch } from "react-redux";
 import { addItem } from "@/redux/cartSlice";
 import { useFetch } from "@/hooks/useFetch";
-import { FaShoppingCart, FaEye, FaChevronLeft, FaChevronRight, FaHeart, FaTruck, FaShieldAlt, FaUndo } from "react-icons/fa";
-import Image from 'next/image';
-
-interface Product {
-  _id?: string;
-  id: string;
-  name: string;
-  price: string;
-  image: string;
-  category: string;
-}
+import { FaShoppingCart, FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { Product } from "@/app/admin/types";
+import QuickViewModal from "./QuickViewModal";
 
 const Showcase = () => {
   const dispatch = useDispatch();
@@ -34,10 +26,10 @@ const Showcase = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showAddedToCart, setShowAddedToCart] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Use the useFetch hook to fetch products
   const { data: response = { products: [] }, error } = useFetch<{ products: Product[], pagination: { total: number, page: number, limit: number, pages: number } }>("/api/products");
@@ -111,14 +103,15 @@ const Showcase = () => {
 
     setIsAddingToCart(true);
     try {
-      dispatch(addItem({
+      const cartItem = {
         id: product._id,
         name: product.name,
-        price: product.price,
+        price: typeof product.price === 'string' ? product.price : product.price.toString(),
         image: product.image,
         category: product.category,
         quantity: 1
-      }));
+      };
+      dispatch(addItem(cartItem));
       setShowAddedToCart(true);
       setTimeout(() => setShowAddedToCart(false), 2000);
     } catch (error) {
@@ -282,12 +275,12 @@ const Showcase = () => {
                   transition={{ type: "spring", stiffness: 120, damping: 12, mass: 1.8 }}
                   onMouseMove={!isMobile ? (e) => handleMouseMove(e, index) : undefined}
                   onMouseLeave={!isMobile ? handleMouseLeave : undefined}
-                  onClick={() => setIsQuickViewOpen(true)}
+                  onClick={() => setSelectedProduct(product)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
-                      setIsQuickViewOpen(true);
+                      setSelectedProduct(product);
                     }
                   }}
                 />
@@ -301,7 +294,7 @@ const Showcase = () => {
                     {product.name}
                   </h3>
                   <p className="text-white/90 text-sm drop-shadow-lg mt-10">
-                    ${product.price}
+                    ${Number(product.price).toFixed(2)}
                   </p>
                 </motion.div>
               </motion.div>
@@ -334,7 +327,7 @@ const Showcase = () => {
                     boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)"
                   }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsQuickViewOpen(true)}
+                  onClick={() => setSelectedProduct(product)}
                   className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg relative overflow-hidden group"
                   aria-label={`Quick view ${product.name}`}
                 >
@@ -407,7 +400,7 @@ const Showcase = () => {
               transition={{ delay: 0.1 }}
               className="text-2xl font-bold bg-gradient-to-r from-[#FB9EC6] to-[#da004c] bg-clip-text text-transparent transform group-hover:scale-105 transition-transform duration-300"
             >
-              ${activeProduct?.price}
+              ${Number(activeProduct?.price).toFixed(2)}
             </motion.div>
             <motion.div
               initial={{ opacity: 0 }}
@@ -443,235 +436,16 @@ const Showcase = () => {
       </motion.div>
 
       {/* Quick View Modal */}
-      <AnimatePresence>
-        {isQuickViewOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setIsQuickViewOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 sm:p-6 max-w-4xl w-full shadow-2xl max-h-[90vh] overflow-y-auto border border-gray-100"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-start mb-6">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-2"
-                >
-                  <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
-                    {activeProduct?.name}
-                  </h2>
-                  <div className="flex items-center space-x-3">
-                    <span className="px-3 py-1 bg-[#FB9EC6]/10 rounded-full text-sm font-medium text-[#FB9EC6]">
-                      {activeProduct?.category}
-                    </span>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      className="flex items-center space-x-1 text-yellow-400"
-                    >
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg
-                          key={star}
-                          className="w-5 h-5"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                      <span className="text-sm text-gray-500 ml-1">(4.8)</span>
-                    </motion.div>
-                  </div>
-                </motion.div>
-                <div className="flex items-center space-x-2">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleWishlistToggle}
-                    className={`p-2 rounded-full transition-colors duration-300 ${
-                      isWishlisted ? 'text-red-500 bg-red-50' : 'text-gray-500 hover:bg-gray-100'
-                    }`}
-                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                  >
-                    <FaHeart className="w-6 h-6" />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setIsQuickViewOpen(false)}
-                    className="text-gray-500 hover:text-gray-700 transition-colors duration-300 p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </motion.button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="space-y-4"
-                >
-                  <div className="relative group">
-                    <motion.div className="relative w-full h-[400px]">
-                      <Image
-                        src={activeProduct?.image || '/placeholder.png'}
-                        alt={activeProduct?.name || 'Product image'}
-                        fill
-                        className="rounded-lg object-cover shadow-lg transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                      className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg pointer-events-none"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[1, 2, 3, 4].map((index) => (
-                      <motion.div
-                        key={index}
-                        whileHover={{ scale: 1.05 }}
-                        onClick={() => setSelectedImage(index - 1)}
-                        className={`relative h-20 rounded-lg overflow-hidden cursor-pointer ${
-                          selectedImage === index - 1 ? 'ring-2 ring-[#FB9EC6]' : ''
-                        }`}
-                      >
-                        <Image
-                          src={activeProduct?.image || '/placeholder.png'}
-                          alt={`${activeProduct?.name} view ${index}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                <div className="space-y-6">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="space-y-2"
-                  >
-                    <h3 className="text-sm font-medium text-gray-500">Price</h3>
-                    <div className="flex items-baseline space-x-2">
-                      <p className="text-4xl font-bold text-[#FB9EC6]">
-                        ${activeProduct?.price}
-                      </p>
-                      <span className="text-sm text-gray-500 line-through">${(parseFloat(activeProduct?.price || '0') * 1.2).toFixed(2)}</span>
-                      <span className="px-2 py-1 bg-green-100 text-green-600 text-xs font-medium rounded">20% OFF</span>
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="space-y-2"
-                  >
-                    <h3 className="text-sm font-medium text-gray-500">Description</h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      Experience the perfect blend of style and comfort with this premium product. 
-                      Crafted with attention to detail and made from high-quality materials.
-                    </p>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="space-y-2"
-                  >
-                    <h3 className="text-sm font-medium text-gray-500">Features</h3>
-                    <ul className="space-y-2">
-                      {[
-                        'Premium quality materials',
-                        'Comfortable fit',
-                        'Easy to maintain',
-                        'Durable construction'
-                      ].map((feature, index) => (
-                        <motion.li
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.5 + index * 0.1 }}
-                          className="flex items-center space-x-2 text-gray-600"
-                        >
-                          <svg className="w-5 h-5 text-[#FB9EC6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span>{feature}</span>
-                        </motion.li>
-                      ))}
-                    </ul>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="space-y-4"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          handleAddToCart(activeProduct);
-                          setIsQuickViewOpen(false);
-                        }}
-                        className="flex-1 px-6 py-4 bg-[#FB9EC6] text-white rounded-lg hover:bg-[#da004c] transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg space-x-2"
-                      >
-                        <FaShoppingCart className="w-5 h-5" />
-                        <span className="font-medium">Add to Cart</span>
-                      </motion.button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <FaTruck className="w-5 h-5 text-[#FB9EC6]" />
-                        <div>
-                          <p className="text-sm font-medium">Free Shipping</p>
-                          <p className="text-xs text-gray-500">On orders over $50</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <FaShieldAlt className="w-5 h-5 text-[#FB9EC6]" />
-                        <div>
-                          <p className="text-sm font-medium">Secure Payment</p>
-                          <p className="text-xs text-gray-500">100% Protected</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <FaUndo className="w-5 h-5 text-[#FB9EC6]" />
-                        <div>
-                          <p className="text-sm font-medium">Easy Returns</p>
-                          <p className="text-xs text-gray-500">30 Day Returns</p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <QuickViewModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={(product: Product) => {
+          handleAddToCart(product);
+        }}
+        onAddToWishlist={() => {
+          handleWishlistToggle();
+        }}
+      />
     </motion.div>
   );
 };

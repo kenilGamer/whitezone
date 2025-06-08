@@ -76,7 +76,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ stats, show }) => {
               }`}
             >
               <div className="flex justify-between items-center">
-                <span className="font-medium">{activity.productName}</span>
+                <span className="font-medium">{activity.product}</span>
                 <span
                   className={`text-sm ${
                     activity.type === "add"

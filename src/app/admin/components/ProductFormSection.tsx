@@ -63,7 +63,7 @@ export function ProductFormSection({
 
           <ProductForm
             form={form}
-            formErrors={formErrors}
+            errors={formErrors}
             isSubmitting={isSubmitting}
             previewImage={previewImage}
             tagInput={tagInput}
@@ -72,8 +72,13 @@ export function ProductFormSection({
             onAddTag={onAddTag}
             onRemoveTag={onRemoveTag}
             onSubmit={onSubmit}
+            onCancel={onClose}
             onTagInputChange={onTagInputChange}
             onTagInputKeyDown={onTagInputKeyDown}
+            onAutoCategorize={onFormChange}
+            onSuggestPrice={onFormChange}
+            onGenerateTags={onFormChange}
+            onSuggestReorderQuantity={onFormChange}
           />
         </div>
       </div>

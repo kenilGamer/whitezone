@@ -153,7 +153,11 @@ export const filterAndSortProducts = (
 export const updateStats = (products: Product[]): Stats => {
   const totalProducts = products.length;
   const totalStock = products.reduce((sum, product) => sum + (product.stock || 0), 0);
-  const totalValue = products.reduce((sum, product) => sum + (parseFloat(product.price) * (product.stock || 0)), 0);
+  const totalValue = products.reduce((sum, product) => {
+    const price = Number(product.price) || 0;
+    const stock = Number(product.stock) || 0;
+    return sum + (price * stock);
+  }, 0);
   const lowStock = products.filter(product => (product.stock || 0) < 10).length;
 
   // Calculate category distribution
@@ -164,7 +168,9 @@ export const updateStats = (products: Product[]): Stats => {
 
   // Calculate stock value by category
   const stockValueByCategory = products.reduce((acc, product) => {
-    const value = parseFloat(product.price) * (product.stock || 0);
+    const price = Number(product.price) || 0;
+    const stock = Number(product.stock) || 0;
+    const value = price * stock;
     acc[product.category] = (acc[product.category] || 0) + value;
     return acc;
   }, {} as { [key: string]: number });
@@ -197,7 +203,7 @@ export const resetForm = (): FormState => ({
     height: ""
   },
   tags: [],
-
+  tagInput: "",
   discount: "",
   color: "",
   size: "",
@@ -338,10 +344,10 @@ export const handleEdit = (
     weight: product.weight || '',
     dimensions: product.dimensions || { length: '', width: '', height: '' },
     tags: product.tags || [],
+    tagInput: '',
     discount: product.discount || '',
     color: product.color || '',
     size: product.size || '',
-
   });
   setShowForm(true);
 };

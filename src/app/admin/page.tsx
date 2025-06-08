@@ -215,7 +215,7 @@ function Page() {
         <AnimatePresence>
           {notification && (
             <Notification
-              type={notification.type}
+              type={notification.type === 'info' ? 'warning' : notification.type}
               message={notification.message}
             />
           )}

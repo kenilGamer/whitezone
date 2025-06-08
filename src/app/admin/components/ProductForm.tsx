@@ -8,34 +8,40 @@ interface ProductFormProps {
   form: FormState;
   errors: FormErrors;
   isSubmitting: boolean;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  previewImage: string | null;
+  tagInput: string;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddTag: () => void;
   onRemoveTag: (index: number) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onCancel: () => void;
+  onTagInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onTagInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onAutoCategorize: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSuggestPrice: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onGenerateTags: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSuggestReorderQuantity: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  tagInput: string;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
   form,
   errors,
   isSubmitting,
-  onSubmit,
-  onCancel,
+  previewImage,
+  tagInput,
   onFormChange,
   onImageChange,
   onAddTag,
   onRemoveTag,
+  onSubmit,
+  onCancel,
+  onTagInputChange,
+  onTagInputKeyDown,
   onAutoCategorize,
   onSuggestPrice,
   onGenerateTags,
-  onSuggestReorderQuantity,
-  tagInput
+  onSuggestReorderQuantity
 }) => {
   return (
     <motion.div
@@ -165,10 +171,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="space-y-1 text-center">
-                  {form.image ? (
+                  {previewImage ? (
                     <div className="relative h-48 w-full">
                       <Image
-                        src={form.image}
+                        src={previewImage}
                         alt="Product preview"
                         fill
                         className="object-cover rounded-lg"
@@ -238,7 +244,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <input
                   type="text"
                   value={tagInput}
-                  onChange={(e) => onFormChange({ target: { name: "tagInput", value: e.target.value } } as React.ChangeEvent<HTMLInputElement>)}
+                  onChange={onTagInputChange}
+                  onKeyDown={onTagInputKeyDown}
                   placeholder="Add a tag"
                   className="flex-1 rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
