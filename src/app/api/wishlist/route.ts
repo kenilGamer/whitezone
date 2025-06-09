@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Wishlist from '@/model/Wishlist';
 import dbConnect from '@/lib/db-connect';
+import mongoose from 'mongoose';
 
 // GET /api/wishlist
 export async function GET(request: Request) {
@@ -32,37 +33,54 @@ export async function GET(request: Request) {
 }
 
 // POST /api/wishlist
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { userId, productId, name, price, image, category } = body;
 
-    if (!userId || !productId || !name || !price || !image || !category) {
+    if (!userId || !productId) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'User ID and Product ID are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return NextResponse.json(
+        { error: 'Invalid Product ID format' },
         { status: 400 }
       );
     }
 
     await dbConnect();
 
-    const wishlistItem = new Wishlist({
+    // Check if item already exists in wishlist
+    const existingItem = await Wishlist.findOne({
       userId,
-      productId,
+      productId: new mongoose.Types.ObjectId(productId)
+    });
+
+    if (existingItem) {
+      return NextResponse.json(
+        { error: 'Item is already in wishlist' },
+        { status: 400 }
+      );
+    }
+
+    const wishlistItem = await Wishlist.create({
+      userId,
+      productId: new mongoose.Types.ObjectId(productId),
       name,
-      price: Number(price),
+      price: typeof price === 'string' ? Number(price) : price,
       image,
       category
     });
 
-    await wishlistItem.save();
-
     return NextResponse.json(wishlistItem);
-  } catch (error: unknown) {
-    console.error('Error adding to wishlist:', error);
-    if (error instanceof Error && 'code' in error && error.code === 11000) {
+  } catch (error) {
+    if (error instanceof Error) {
       return NextResponse.json(
-        { error: 'Item is already in wishlist' },
+        { error: error.message },
         { status: 400 }
       );
     }

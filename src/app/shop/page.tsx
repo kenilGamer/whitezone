@@ -50,9 +50,17 @@ function Page() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to add to wishlist');
+        // If the item is already in wishlist, treat it as a success
+        if (data.error === 'Item is already in wishlist') {
+          toast.success('Already in wishlist', {
+            description: `${product.name} is already in your wishlist.`,
+          });
+          return;
+        }
+        throw new Error(data.error || 'Failed to add to wishlist');
       }
 
       toast.success('Added to wishlist!', {

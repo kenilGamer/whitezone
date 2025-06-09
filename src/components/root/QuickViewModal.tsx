@@ -140,9 +140,17 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to add to wishlist');
+        if (data.error === 'Item is already in wishlist') {
+          setIsWishlisted(true);
+          toast.info('Already in wishlist', {
+            description: `${product.name} is already in your wishlist.`,
+          });
+          return;
+        }
+        throw new Error(data.error || 'Failed to add to wishlist');
       }
 
       setIsWishlisted(true);
@@ -151,9 +159,16 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
       });
     } catch (error) {
       console.error('Error adding to wishlist:', error);
-      toast.error('Failed to add to wishlist', {
-        description: error instanceof Error ? error.message : 'Please try again later.',
-      });
+      if (error instanceof Error && error.message === 'Item is already in wishlist') {
+        setIsWishlisted(true);
+        toast.info('Already in wishlist', {
+          description: `${product.name} is already in your wishlist.`,
+        });
+      } else {
+        toast.error('Failed to add to wishlist', {
+          description: error instanceof Error ? error.message : 'Please try again later.',
+        });
+      }
     } finally {
       setIsAddingToWishlist(false);
     }
