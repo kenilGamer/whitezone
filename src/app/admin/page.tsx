@@ -18,9 +18,14 @@ import {
   handleToggleShowHome,
   handleDelete,
   filterAndSortProducts,
+  handleSubmit as utilHandleSubmit,
   handleFilterChange,
   resetFilters,
   removeFilter,
+  handleNameChange,
+  handleCategoryChange,
+  handleDescriptionChange,
+  handleStockChange,
 } from "./utils/functions";
 import Header from './components/Header';
 import ProductList from './components/ProductList';
@@ -133,10 +138,10 @@ function Page() {
   }, [form, isDirty]);
 
   // Modify form change handlers to set dirty state
-  const handleFormChange = (field: string, value: string | number | boolean | string[]) => {
+  const handleFormChange = useCallback((field: string, value: string | number | boolean | string[]) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setIsDirty(true);
-  };
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -147,46 +152,53 @@ function Page() {
         setForm(prev => ({ ...prev, image: reader.result as string }));
       };
       reader.readAsDataURL(file);
+    } else {
+      // If no file is selected (e.g., cleared), clear the image and preview
+      setPreviewImage(null);
+      setForm(prev => ({ ...prev, image: "" }));
     }
   };
 
-  const handleAddTag = () => {
+  const handleAddTag = useCallback(() => {
     if (tagInput.trim() && !form.tags.includes(tagInput.trim())) {
       setForm(prev => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }));
       setTagInput('');
     }
-  };
+  }, [tagInput]);
 
-  const handleRemoveTag = (index: number) => {
+  const handleRemoveTag = useCallback((index: number) => {
     setForm(prev => ({
       ...prev,
       tags: prev.tags.filter((_, i) => i !== index)
     }));
-  };
+  }, [form.tags]);
 
-  const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTagInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTagInput(e.target.value);
-  };
+  }, []);
 
-  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleTagInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddTag();
     }
-  };
+  }, [handleAddTag]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setFormErrors({});
-    try {
-      // ... implementation ...
-    } catch (error) {
-      setFormErrors({ name: error instanceof Error ? error.message : 'Failed to submit form' });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    // Call the handleSubmit from utils/functions.ts
+    utilHandleSubmit(
+      e,
+      form,
+      editingProduct,
+      setFormErrors,
+      setIsSubmitting,
+      setShowForm,
+      setForm,
+      setPreviewImage,
+      setNotification,
+      fetchProducts
+    );
+  }, [form, editingProduct, setFormErrors, setIsSubmitting, setShowForm, setForm, setPreviewImage, setNotification, fetchProducts]);
 
   useEffect(() => {
     fetchProducts();
@@ -265,6 +277,10 @@ function Page() {
               onClose={() => setShowForm(false)}
               onTagInputChange={handleTagInputChange}
               onTagInputKeyDown={handleTagInputKeyDown}
+              onAutoCategorize={(e) => handleNameChange(e as React.ChangeEvent<HTMLInputElement>, form, handleFormChange)}
+              onSuggestPrice={(e) => handleCategoryChange(e as React.ChangeEvent<HTMLSelectElement>, form, products, handleFormChange)}
+              onGenerateTags={(e) => handleDescriptionChange(e as React.ChangeEvent<HTMLTextAreaElement>, form, handleFormChange)}
+              onSuggestReorderQuantity={(e) => handleStockChange(e as React.ChangeEvent<HTMLInputElement>, lowStockThreshold, handleFormChange, setNotification)}
             />
           )}
         </AnimatePresence>

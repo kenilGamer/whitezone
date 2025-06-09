@@ -19,6 +19,10 @@ interface ProductFormSectionProps {
   onClose: () => void;
   onTagInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onTagInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onAutoCategorize: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSuggestPrice: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onGenerateTags: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onSuggestReorderQuantity: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function ProductFormSection({
@@ -36,7 +40,11 @@ export function ProductFormSection({
   onSubmit,
   onClose,
   onTagInputChange,
-  onTagInputKeyDown
+  onTagInputKeyDown,
+  onAutoCategorize,
+  onSuggestPrice,
+  onGenerateTags,
+  onSuggestReorderQuantity,
 }: ProductFormSectionProps) {
   if (!showForm) return null;
 
@@ -45,7 +53,7 @@ export function ProductFormSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-transparent  flex items-center justify-center p-4 z-50"
     >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
@@ -75,10 +83,10 @@ export function ProductFormSection({
             onCancel={onClose}
             onTagInputChange={onTagInputChange}
             onTagInputKeyDown={onTagInputKeyDown}
-            onAutoCategorize={onFormChange}
-            onSuggestPrice={onFormChange}
-            onGenerateTags={onFormChange}
-            onSuggestReorderQuantity={onFormChange}
+            onAutoCategorize={onAutoCategorize}
+            onSuggestPrice={onSuggestPrice}
+            onGenerateTags={onGenerateTags}
+            onSuggestReorderQuantity={onSuggestReorderQuantity}
           />
         </div>
       </div>

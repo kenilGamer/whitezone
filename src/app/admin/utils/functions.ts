@@ -74,6 +74,8 @@ export const validateForm = (form: FormState): FormErrors => {
   if (!form.stock) errors.stock = "Stock is required";
   if (!form.image) errors.image = "Image is required";
 
+  console.log("Validation Errors:", errors); // Temporary log
+
   return errors;
 };
 
@@ -359,7 +361,7 @@ export const handleDelete = async (
   fetchProducts: () => Promise<void>
 ) => {
   try {
-    const response = await fetch(`/api/products/${id}`, {
+    const response = await fetch(`/api/products?id=${id}`, {
       method: 'DELETE',
     });
 
@@ -383,8 +385,8 @@ export const handleToggleShowHome = async (
   fetchProducts: () => Promise<void>
 ) => {
   try {
-    const response = await fetch(`/api/products/${id}`, {
-      method: 'PATCH',
+    const response = await fetch(`/api/products?id=${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
