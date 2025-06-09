@@ -8,6 +8,8 @@ import { useLoading } from "@/context/loading-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaShoppingCart, FaHeart, FaSearch, FaFilter } from "react-icons/fa";
 import Image from 'next/image';
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 interface Product {
   _id?: string;
@@ -26,6 +28,45 @@ function Page() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
   const { startLoading, stopLoading, updateProgress } = useLoading();
+
+  const addToWishlist = async (product: Product) => {
+    startLoading('Adding to wishlist...');
+    try {
+      // TODO: Replace with actual user ID from authentication
+      const userId = 'current-user-id';
+      
+      const response = await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          category: product.category
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to add to wishlist');
+      }
+
+      toast.success('Added to wishlist!', {
+        description: `${product.name} has been added to your wishlist.`,
+      });
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      toast.error('Failed to add to wishlist', {
+        description: error instanceof Error ? error.message : 'Please try again later.',
+      });
+    } finally {
+      stopLoading();
+    }
+  };
 
   // Fetch products from the API
   useEffect(() => {
@@ -62,11 +103,12 @@ function Page() {
   });
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6E0] to-[#FFE893] flex flex-col">
+    <div className="h-screen overflow-hidden w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6E0] to-[#FFE893] flex flex-col">
+      <Toaster position="top-right" richColors />
       <Navbar 
-        onCartClick={() => startLoading('Opening cart...')}
-        onWishlistClick={() => startLoading('Opening wishlist...')}
-        onProfileClick={() => startLoading('Opening profile...')}
+        onCartClick={() => window.location.href = '/cart'}
+        onWishlistClick={() => window.location.href = '/wishlist'}
+        onProfileClick={() => window.location.href = '/profile'}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar onSearch={setSearchQuery} />
@@ -147,7 +189,10 @@ function Page() {
                     />
                     {/* Quick Actions */}
                     <div className="absolute top-4 right-4 flex flex-col space-y-2">
-                      <button className="p-2 bg-white rounded-full shadow-md hover:bg-[#FB9EC6] hover:text-white transition-colors">
+                      <button 
+                        onClick={() => addToWishlist(product)} 
+                        className="p-2 bg-white rounded-full shadow-md hover:bg-[#FB9EC6] hover:text-white transition-colors"
+                      >
                         <FaHeart className="w-5 h-5" />
                       </button>
                     </div>
