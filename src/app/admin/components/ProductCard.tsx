@@ -68,7 +68,11 @@ export default function ProductCard({ product, selected, onSelect, onEdit, onDel
         <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
         <p className="text-[#FB9EC6] font-bold mb-2">${product.price}</p>
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-gray-600">Stock: {product.stock}</span>
+          <span className={`text-sm ${
+            !product.stock || product.stock === 0 ? "text-red-600 font-medium" : "text-gray-600"
+          }`}>
+            {!product.stock || product.stock === 0 ? "Out of Stock" : `Stock: ${product.stock}`}
+          </span>
           <span className="text-sm text-gray-600">{product.category}</span>
         </div>
         <div className="flex items-center space-x-2">

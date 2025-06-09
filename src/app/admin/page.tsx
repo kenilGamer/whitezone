@@ -224,7 +224,8 @@ function Page() {
       />
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <AnimatePresence>
+       <div className="z-50">
+       <AnimatePresence>
           {notification && (
             <Notification
               type={notification.type === 'info' ? 'warning' : notification.type}
@@ -232,6 +233,7 @@ function Page() {
             />
           )}
         </AnimatePresence>
+       </div>
 
         <div className="mb-6">
           <BulkActionsBar

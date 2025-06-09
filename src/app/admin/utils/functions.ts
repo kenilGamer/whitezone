@@ -429,7 +429,7 @@ export const handleSubmit = async (
       return;
     }
 
-    const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
+    const url = editingProduct ? `/api/products?id=${editingProduct.id}` : '/api/products';
     const method = editingProduct ? 'PUT' : 'POST';
 
     const response = await fetch(url, {

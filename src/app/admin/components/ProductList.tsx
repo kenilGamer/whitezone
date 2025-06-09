@@ -58,12 +58,12 @@ const ProductList: React.FC<ProductListProps> = ({
               <div className="flex justify-between items-center mb-4">
                 <span className="text-lg font-bold">${product.price}</span>
                 <span className={`px-2 py-1 rounded-full text-sm ${
+                  !product.stock || product.stock === 0 ? "bg-red-100 text-red-800" :
                   product.stock > 10 ? "bg-green-100 text-green-800" :
-                  product.stock > 0 ? "bg-yellow-100 text-yellow-800" :
-                  "bg-red-100 text-red-800"
+                  "bg-yellow-100 text-yellow-800"
                 }`}>
-                  {product.stock} in stock
-                </span>
+                  {!product.stock || product.stock === 0 ? "Out of Stock" : `${product.stock} in stock`}
+                </span>xs
               </div>
               <div className="flex justify-between items-center">
                 <button
@@ -119,11 +119,11 @@ const ProductList: React.FC<ProductListProps> = ({
             <div className="flex justify-between items-center mb-4">
               <span className="text-2xl font-bold">${selectedProduct.price}</span>
               <span className={`px-3 py-1 rounded-full text-sm ${
+                !selectedProduct.stock || selectedProduct.stock === 0 ? "bg-red-100 text-red-800" :
                 selectedProduct.stock > 10 ? "bg-green-100 text-green-800" :
-                selectedProduct.stock > 0 ? "bg-yellow-100 text-yellow-800" :
-                "bg-red-100 text-red-800"
+                "bg-yellow-100 text-yellow-800"
               }`}>
-                {selectedProduct.stock} in stock
+                {!selectedProduct.stock || selectedProduct.stock === 0 ? "Out of Stock" : `${selectedProduct.stock} in stock`}
               </span>
             </div>
             <p className="text-gray-700 mb-4">{selectedProduct.description}</p>

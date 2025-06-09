@@ -108,7 +108,11 @@ export default function ProductDetails({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Stock:</span>
-                  <span className="font-medium">{product.stock} units</span>
+                  <span className={`font-medium ${
+                    !product.stock || product.stock === 0 ? "text-red-600" : "text-gray-800"
+                  }`}>
+                    {!product.stock || product.stock === 0 ? "Out of Stock" : `${product.stock} units`}
+                  </span>
                 </div>
                 {product.sku && (
                   <div className="flex items-center justify-between">
