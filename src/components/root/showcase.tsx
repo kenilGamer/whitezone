@@ -26,7 +26,6 @@ const Showcase = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showAddedToCart, setShowAddedToCart] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -135,11 +134,6 @@ const Showcase = () => {
 
   const handleMouseLeave = () => {
     setHoveredIndex(null);
-  };
-
-  const handleWishlistToggle = () => {
-    setIsWishlisted(!isWishlisted);
-    // Here you would typically dispatch an action to update the wishlist in your store
   };
 
   if (error) {
@@ -441,9 +435,6 @@ const Showcase = () => {
         onClose={() => setSelectedProduct(null)}
         onAddToCart={(product: Product) => {
           handleAddToCart(product);
-        }}
-        onAddToWishlist={() => {
-          handleWishlistToggle();
         }}
       />
     </motion.div>

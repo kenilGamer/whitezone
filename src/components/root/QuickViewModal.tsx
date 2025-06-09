@@ -3,19 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaShoppingCart, FaSpinner, FaCheck, FaExclamationTriangle, FaStar, FaTruck, FaShieldAlt, FaUndo, FaShare, FaSearchPlus, FaSearchMinus, FaPrint, FaChevronLeft, FaChevronRight, FaFacebook, FaTwitter, FaPinterest, FaWhatsapp, FaImage, FaInfoCircle, FaRegHeart, FaHeart as FaSolidHeart } from 'react-icons/fa';
 import Image from 'next/image';
 import { Product } from '@/app/admin/types';
+import { toast } from "sonner";
 
 interface QuickViewModalProps {
   product: Product | null;
   onClose: () => void;
   onAddToCart: (product: Product) => void;
-  onAddToWishlist: (product: Product) => void;
 }
 
 const QuickViewModal: React.FC<QuickViewModalProps> = ({
   product,
   onClose,
   onAddToCart,
-  onAddToWishlist,
 }) => {
   // All hooks must be at the top, before any conditional returns
   const [isZoomed, setIsZoomed] = useState(false);
@@ -119,8 +118,45 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
   };
 
   const handleWishlistClick = async () => {
-    setIsWishlisted(!isWishlisted);
-    await handleAddToWishlist();
+    if (!product) return;
+    
+    setIsAddingToWishlist(true);
+    try {
+      // TODO: Replace with actual user ID from authentication
+      const userId = 'current-user-id';
+      
+      const response = await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          category: product.category
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to add to wishlist');
+      }
+
+      setIsWishlisted(true);
+      toast.success('Added to wishlist!', {
+        description: `${product.name} has been added to your wishlist.`,
+      });
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      toast.error('Failed to add to wishlist', {
+        description: error instanceof Error ? error.message : 'Please try again later.',
+      });
+    } finally {
+      setIsAddingToWishlist(false);
+    }
   };
 
   const handleAddToCart = async () => {
@@ -139,20 +175,6 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
       setTimeout(() => setShowError(false), 2000);
     } finally {
       setIsAddingToCart(false);
-    }
-  };
-
-  const handleAddToWishlist = async () => {
-    setIsAddingToWishlist(true);
-    try {
-      await onAddToWishlist(product);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2000);
-    } catch {
-      setShowError(true);
-      setTimeout(() => setShowError(false), 2000);
-    } finally {
-      setIsAddingToWishlist(false);
     }
   };
 

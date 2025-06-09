@@ -7,10 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaShoppingCart, FaHeart, FaTrash } from "react-icons/fa";
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { toast } from "react-hot-toast";
 
 interface Product {
   _id?: string;
   id: string;
+  productId: string;
   name: string;
   price: number;
   image: string;
@@ -51,27 +53,29 @@ function Page() {
     fetchWishlistItems();
   }, [startLoading, stopLoading, updateProgress]);
 
-  const removeFromWishlist = async (productId: string) => {
-    startLoading('Removing from wishlist...');
+  const handleRemoveFromWishlist = async (productId: string) => {
     try {
-      // TODO: Replace with actual user ID from authentication
-      const userId = 'current-user-id';
-      
-      const response = await fetch(`/api/wishlist/${productId}?userId=${userId}`, {
+      const response = await fetch(`/api/wishlist/${productId}`, {
         method: 'DELETE',
       });
+
       if (!response.ok) {
-        throw new Error("Failed to remove item from wishlist");
+        throw new Error('Failed to remove item');
       }
-      setWishlistItems(items => items.filter(item => item._id !== productId));
+
+      // Update the wishlist items state
+      setWishlistItems(prevItems => 
+        prevItems.filter(item => item._id !== productId)
+      );
+
+      toast.success('Removed from wishlist');
     } catch (error) {
-      console.error("Error removing from wishlist:", error);
-    } finally {
-      stopLoading();
+      console.error('Error removing from wishlist:', error);
+      toast.error('Failed to remove item');
     }
   };
 
-  const addToCart = async (product: Product) => {
+  const addToCart = async () => {
     startLoading('Adding to cart...');
     try {
       // TODO: Implement add to cart functionality
@@ -131,7 +135,7 @@ function Page() {
                   />
                   {/* Remove from Wishlist Button */}
                   <button 
-                    onClick={() => removeFromWishlist(item._id!)}
+                    onClick={() => handleRemoveFromWishlist(item._id!)}
                     className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-red-500 hover:text-white transition-colors"
                   >
                     <FaTrash className="w-5 h-5" />
@@ -154,7 +158,7 @@ function Page() {
                   </p>
                   <button 
                     className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#FB9EC6] to-[#ff2885] text-white rounded-lg hover:from-[#ff2885] hover:to-[#FB9EC6] transition-all duration-300 transform hover:scale-105"
-                    onClick={() => addToCart(item)}
+                    onClick={() => addToCart()}
                   >
                     <FaShoppingCart className="w-5 h-5" />
                     <span>Add to Cart</span>
