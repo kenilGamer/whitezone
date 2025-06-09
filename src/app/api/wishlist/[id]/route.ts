@@ -5,12 +5,12 @@ import dbConnect from '@/lib/db-connect';
 // DELETE /api/wishlist/[id]
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    const id = params.id;
+    const { id } = context.params;
 
     if (!userId) {
       return NextResponse.json(
