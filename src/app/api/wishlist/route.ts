@@ -58,9 +58,9 @@ export async function POST(request: Request) {
     await wishlistItem.save();
 
     return NextResponse.json(wishlistItem);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error adding to wishlist:', error);
-    if (error.code === 11000) {
+    if (error instanceof Error && 'code' in error && error.code === 11000) {
       return NextResponse.json(
         { error: 'Item is already in wishlist' },
         { status: 400 }
