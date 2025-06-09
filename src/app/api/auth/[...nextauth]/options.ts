@@ -6,11 +6,9 @@ import UserModel from "@/model/user";
 import dbConnect from "@/lib/db-connect";
 
 // Define an interface for the credentials
-
-// Extend the User type from next-auth
 interface User extends NextAuthUser {
-  id: string; // Add the id property
-  _id: string; // Keep _id if you need it
+  id: string;
+  _id: string;
   role: string;
 }
 
@@ -31,7 +29,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const { username, email, password } = credentials;
-        const identifier = username || email; // Use either username or email
+        const identifier = username || email;
 
         try {
           const user = await UserModel.findOne({
@@ -56,13 +54,12 @@ export const authOptions: NextAuthOptions = {
 
           if (isPasswordCorrect) {
             return {
-              id: user._id.toString(), // Add the id property
+              id: user._id.toString(),
               _id: user._id.toString(),
               username: user.username,
               email: user.email,
               role: user.role,
-              // Include any other necessary fields
-            } as User; // Cast to User type
+            } as User;
           } else {
             throw new Error("Incorrect password");
           }
@@ -74,6 +71,14 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+          scope: "openid email profile"
+        }
+      }
     }),
   ],
   callbacks: {
@@ -86,15 +91,12 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!existingUser) {
-            // Generate username from Google profile
             let username = profile?.name?.replace(/\s+/g, "").toLowerCase();
 
-            // If no name in profile, use email local part
             if (!username) {
               username = profile?.email?.split("@")[0];
             }
 
-            // Check for existing username
             let usernameExists = await UserModel.findOne({ username });
             while (usernameExists) {
               username = `${username}${Math.floor(Math.random() * 1000)}`;
@@ -105,7 +107,6 @@ export const authOptions: NextAuthOptions = {
               email: profile?.email,
               username,
               role: "user",
-              // Add any other required fields from your UserModel
             });
 
             await newUser.save();
@@ -113,7 +114,6 @@ export const authOptions: NextAuthOptions = {
             user.username = newUser.username;
             user.role = newUser.role;
           } else {
-            // Update user object with existing data
             user._id = existingUser._id.toString();
             user.username = existingUser.username;
             user.role = existingUser.role;
@@ -140,13 +140,16 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
       }
       return session;
-    },
+    }
   },
   pages: {
     signIn: "/sign-in",
+    error: "/sign-in",
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
 };
