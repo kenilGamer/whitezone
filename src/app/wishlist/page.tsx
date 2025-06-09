@@ -55,7 +55,10 @@ function Page() {
 
   const handleRemoveFromWishlist = async (productId: string) => {
     try {
-      const response = await fetch(`/api/wishlist/${productId}`, {
+      // TODO: Replace with actual user ID from authentication
+      const userId = 'current-user-id';
+      
+      const response = await fetch(`/api/wishlist?userId=${userId}&productId=${productId}`, {
         method: 'DELETE',
       });
 
@@ -65,7 +68,7 @@ function Page() {
 
       // Update the wishlist items state
       setWishlistItems(prevItems => 
-        prevItems.filter(item => item._id !== productId)
+        prevItems.filter(item => item.productId !== productId)
       );
 
       toast.success('Removed from wishlist');
@@ -135,7 +138,7 @@ function Page() {
                   />
                   {/* Remove from Wishlist Button */}
                   <button 
-                    onClick={() => handleRemoveFromWishlist(item._id!)}
+                    onClick={() => handleRemoveFromWishlist(item.productId)}
                     className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-red-500 hover:text-white transition-colors"
                   >
                     <FaTrash className="w-5 h-5" />

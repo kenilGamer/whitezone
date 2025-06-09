@@ -89,4 +89,53 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
+
+// DELETE /api/wishlist
+export async function DELETE(request: NextRequest) {
+  try {
+    const userId = request.nextUrl.searchParams.get('userId');
+    const productId = request.nextUrl.searchParams.get('productId');
+
+    if (!userId || !productId) {
+      return NextResponse.json(
+        { error: 'User ID and Product ID are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return NextResponse.json(
+        { error: 'Invalid Product ID format' },
+        { status: 400 }
+      );
+    }
+
+    await dbConnect();
+
+    const deletedItem = await Wishlist.findOneAndDelete({
+      userId,
+      productId: new mongoose.Types.ObjectId(productId)
+    });
+
+    if (!deletedItem) {
+      return NextResponse.json(
+        { error: 'Wishlist item not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ message: 'Item removed from wishlist' });
+  } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: 'Failed to remove item from wishlist' },
+      { status: 500 }
+    );
+  }
+}
