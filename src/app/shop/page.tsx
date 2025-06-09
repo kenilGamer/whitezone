@@ -6,10 +6,12 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLoading } from "@/context/loading-context";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaShoppingCart, FaHeart, FaSearch, FaFilter } from "react-icons/fa";
+import { FaShoppingCart, FaHeart, FaSearch, FaFilter, FaSpinner } from "react-icons/fa";
 import Image from 'next/image';
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { addItem } from "@/redux/cartSlice";
 
 interface Product {
   _id?: string;
@@ -28,6 +30,29 @@ function Page() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
   const { startLoading, stopLoading, updateProgress } = useLoading();
+  const [isAddingToCart, setIsAddingToCart] = useState<string | null>(null);
+  const dispatch = useDispatch();
+
+  const addToCart = async (product: Product) => {
+    setIsAddingToCart(product._id || null);
+    try {
+      dispatch(addItem({
+        id: product._id || product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: 1,
+        category: product.category
+      }));
+      toast.success('Added to cart', {
+        description: `${product.name} has been added to your cart.`,
+      });
+    } catch (error) {
+      toast.error('Failed to add to cart');
+    } finally {
+      setIsAddingToCart(null);
+    }
+  };
 
   const addToWishlist = async (product: Product) => {
     startLoading('Adding to wishlist...');
@@ -222,16 +247,20 @@ function Page() {
                     </p>
                     <button 
                       className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#FB9EC6] to-[#ff2885] text-white rounded-lg hover:from-[#ff2885] hover:to-[#FB9EC6] transition-all duration-300 transform hover:scale-105"
-                      onClick={() => {
-                        startLoading('Adding to cart...');
-                        setTimeout(() => {
-                          stopLoading();
-                          alert('Added to cart!');
-                        }, 1000);
-                      }}
+                      onClick={() => addToCart(product)}
+                      disabled={isAddingToCart === product._id}
                     >
-                      <FaShoppingCart className="w-5 h-5" />
-                      <span>Add to Cart</span>
+                      {isAddingToCart === product._id ? (
+                        <>
+                          <FaSpinner className="animate-spin" />
+                          <span>Adding...</span>
+                        </>
+                      ) : (
+                        <>
+                          <FaShoppingCart className="w-5 h-5" />
+                          <span>Add to Cart</span>
+                        </>
+                      )}
                     </button>
                   </div>
 

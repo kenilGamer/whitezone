@@ -21,10 +21,10 @@ function Sidebar({ onSearch }: { onSearch: (query: string) => void }) {
   };
 
   return (
-    <div className="relative h-[90vh]">
+    <div className="relative h-[90vh] z-[500]">
       {/* Toggle Button for Sidebar */}
       <button
-        className="absolute left-2 z-50 md:hidden text-3xl text-[#FB9EC6]"
+        className="absolute left-2 z-[500] md:hidden text-3xl text-[#FB9EC6]"
         onClick={toggleSidebar}
       >
         {isOpen ? <IoMdClose className="text-3xl text-white" /> : <MdOutlineMenu />}
