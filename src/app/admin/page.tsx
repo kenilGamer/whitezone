@@ -160,8 +160,13 @@ function Page() {
   };
 
   const handleAddTag = useCallback(() => {
-    if (tagInput.trim() && !form.tags.includes(tagInput.trim())) {
-      setForm(prev => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }));
+    if (tagInput.trim()) {
+      setForm(prev => {
+        if (!prev.tags.includes(tagInput.trim())) {
+          return { ...prev, tags: [...prev.tags, tagInput.trim()] };
+        }
+        return prev;
+      });
       setTagInput('');
     }
   }, [tagInput]);
@@ -171,7 +176,7 @@ function Page() {
       ...prev,
       tags: prev.tags.filter((_, i) => i !== index)
     }));
-  }, [form.tags]);
+  }, []);
 
   const handleTagInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTagInput(e.target.value);

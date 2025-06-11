@@ -6,7 +6,7 @@ const wishlistSchema = new mongoose.Schema({
     required: true,
   },
   productId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
   name: {
@@ -16,6 +16,8 @@ const wishlistSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true,
+    get: (v: number) => Number(v.toFixed(2)),
+    set: (v: number | string) => Number(Number(v).toFixed(2))
   },
   image: {
     type: String,

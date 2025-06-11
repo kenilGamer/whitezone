@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { addItem } from "@/redux/cartSlice";
+import { useSession } from "next-auth/react";
 
 interface Product {
   _id?: string;
@@ -32,6 +33,7 @@ function Page() {
   const { startLoading, stopLoading, updateProgress } = useLoading();
   const [isAddingToCart, setIsAddingToCart] = useState<string | null>(null);
   const dispatch = useDispatch();
+  const { data: session } = useSession();
 
   const addToCart = async (product: Product) => {
     setIsAddingToCart(product._id || null);
@@ -47,55 +49,90 @@ function Page() {
       toast.success('Added to cart', {
         description: `${product.name} has been added to your cart.`,
       });
-    } catch (error) {
-      toast.error('Failed to add to cart');
+    } catch (error: unknown) {
+      console.error('Failed to add to cart:', error);
+      toast.error('Failed to add to cart', {
+        description: error instanceof Error ? error.message : 'Please try again later.',
+      });
     } finally {
       setIsAddingToCart(null);
     }
   };
 
   const addToWishlist = async (product: Product) => {
+    // Prevent multiple clicks
+    if (isAddingToCart) return;
+    
     startLoading('Adding to wishlist...');
     try {
-      // TODO: Replace with actual user ID from authentication
-      const userId = 'current-user-id';
+      // Validate session
+      if (!session?.user?._id) {
+        toast.error('Please sign in to add items to your wishlist');
+        return;
+      }
+
+      // Validate product data
+      if (!product._id || !product.name || !product.price || !product.image || !product.category) {
+        toast.error('Invalid product data');
+        return;
+      }
+
+      const requestData = {
+        userId: session.user._id,
+        productId: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category
+      };
+      
+      console.log('Sending wishlist request with data:', requestData);
       
       const response = await fetch('/api/wishlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId,
-          productId: product._id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          category: product.category
-        }),
+        body: JSON.stringify(requestData),
       });
-
+      
       const data = await response.json();
-
-      if (!response.ok) {
-        // If the item is already in wishlist, treat it as a success
-        if (data.error === 'Item is already in wishlist') {
+      console.log('Wishlist response:', data);
+      
+      // Handle response based on status
+      if (data.status === 'success') {
+        if (data.message === 'Item is already in wishlist') {
           toast.success('Already in wishlist', {
             description: `${product.name} is already in your wishlist.`,
           });
+        } else {
+          toast.success('Added to wishlist!', {
+            description: `${product.name} has been added to your wishlist.`,
+          });
+        }
+        return;
+      }
+      
+      if (!response.ok) {
+        // Handle error cases
+        if (data.error === 'Invalid Product ID format') {
+          toast.error('Invalid product');
           return;
         }
         throw new Error(data.error || 'Failed to add to wishlist');
       }
-
-      toast.success('Added to wishlist!', {
-        description: `${product.name} has been added to your wishlist.`,
-      });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error adding to wishlist:', error);
-      toast.error('Failed to add to wishlist', {
-        description: error instanceof Error ? error.message : 'Please try again later.',
-      });
+      // Handle specific error types
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        toast.error('Network error', {
+          description: 'Please check your internet connection and try again.',
+        });
+      } else {
+        toast.error('Failed to add to wishlist', {
+          description: error instanceof Error ? error.message : 'Please try again later.',
+        });
+      }
     } finally {
       stopLoading();
     }
@@ -117,8 +154,11 @@ function Page() {
         setProducts(data.products);
         updateProgress(100);
         await new Promise(resolve => setTimeout(resolve, 500));
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error fetching products:", error);
+        toast.error('Failed to fetch products', {
+          description: error instanceof Error ? error.message : 'Please try again later.',
+        });
       } finally {
         stopLoading();
       }

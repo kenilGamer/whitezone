@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaShoppingCart, FaHeart, FaTrash } from "react-icons/fa";
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
 interface Product {
   _id?: string;
@@ -23,17 +24,22 @@ function Page() {
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
   const { startLoading, stopLoading, updateProgress } = useLoading();
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   // Fetch wishlist items from the API
   useEffect(() => {
     const fetchWishlistItems = async () => {
+      if (status === 'loading') return;
+      
+      if (!session?.user?._id) {
+        router.push('/sign-in');
+        return;
+      }
+
       startLoading('Loading wishlist...');
       try {
-        // TODO: Replace with actual user ID from authentication
-        const userId = 'current-user-id';
-        
         updateProgress(30);
-        const response = await fetch(`/api/wishlist?userId=${userId}`);
+        const response = await fetch(`/api/wishlist?userId=${session.user._id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch wishlist items");
         }
@@ -45,25 +51,29 @@ function Page() {
         await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {
         console.error("Error fetching wishlist items:", error);
+        toast.error('Failed to load wishlist');
       } finally {
         stopLoading();
       }
     };
 
     fetchWishlistItems();
-  }, [startLoading, stopLoading, updateProgress]);
+  }, [session, status, startLoading, stopLoading, updateProgress, router]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
+    if (!session?.user?._id) {
+      toast.error('Please sign in to manage your wishlist');
+      return;
+    }
+
     try {
-      // TODO: Replace with actual user ID from authentication
-      const userId = 'current-user-id';
-      
-      const response = await fetch(`/api/wishlist?userId=${userId}&productId=${productId}`, {
+      const response = await fetch(`/api/wishlist?userId=${session.user._id}&productId=${productId}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to remove item');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to remove item');
       }
 
       // Update the wishlist items state
@@ -78,18 +88,49 @@ function Page() {
     }
   };
 
-  const addToCart = async () => {
+  const addToCart = async (product: Product) => {
+    if (!session?.user?._id) {
+      toast.error('Please sign in to add items to cart');
+      return;
+    }
+
     startLoading('Adding to cart...');
     try {
       // TODO: Implement add to cart functionality
       await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Added to cart!');
+      toast.success(`Added ${product.name} to cart!`);
     } catch (error) {
       console.error("Error adding to cart:", error);
+      toast.error('Failed to add to cart');
     } finally {
       stopLoading();
     }
   };
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFE893] via-[#FFD6E0] to-[#FFE893]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#FB9EC6]"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FFE893] via-[#FFD6E0] to-[#FFE893] flex items-center justify-center p-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Please Sign In</h2>
+          <p className="text-gray-600 mb-6">Sign in to view and manage your wishlist</p>
+          <button
+            onClick={() => router.push('/sign-in')}
+            className="px-6 py-3 bg-gradient-to-r from-[#FB9EC6] to-[#ff2885] text-white rounded-lg hover:from-[#ff2885] hover:to-[#FB9EC6] transition-all duration-300 transform hover:scale-105"
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen overflow-hidden w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6E0] to-[#FFE893] flex flex-col">
@@ -161,7 +202,7 @@ function Page() {
                   </p>
                   <button 
                     className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#FB9EC6] to-[#ff2885] text-white rounded-lg hover:from-[#ff2885] hover:to-[#FB9EC6] transition-all duration-300 transform hover:scale-105"
-                    onClick={() => addToCart()}
+                    onClick={() => addToCart(item)}
                   >
                     <FaShoppingCart className="w-5 h-5" />
                     <span>Add to Cart</span>

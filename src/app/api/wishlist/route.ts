@@ -36,16 +36,22 @@ export async function GET(request: Request) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('Received wishlist request body:', body);
+    
     const { userId, productId, name, price, image, category } = body;
 
-    if (!userId || !productId) {
+    // Validate required fields
+    if (!userId || !productId || !name || !price || !image || !category) {
+      console.log('Missing required fields:', { userId, productId, name, price, image, category });
       return NextResponse.json(
-        { error: 'User ID and Product ID are required' },
+        { error: 'All fields are required' },
         { status: 400 }
       );
     }
 
+    // Validate productId format
     if (!mongoose.Types.ObjectId.isValid(productId)) {
+      console.log('Invalid productId format:', productId);
       return NextResponse.json(
         { error: 'Invalid Product ID format' },
         { status: 400 }
@@ -61,31 +67,49 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingItem) {
+      console.log('Item already exists in wishlist:', existingItem);
       return NextResponse.json(
-        { error: 'Item is already in wishlist' },
-        { status: 400 }
+        { 
+          status: 'success',
+          message: 'Item is already in wishlist',
+          item: existingItem
+        },
+        { status: 200 }  // Changed from 400 to 200 since this is not an error
       );
     }
 
+    // Create new wishlist item
     const wishlistItem = await Wishlist.create({
       userId,
       productId: new mongoose.Types.ObjectId(productId),
       name,
-      price: typeof price === 'string' ? Number(price) : price,
+      price: Number(price),  // Ensure price is a number
       image,
       category
     });
 
-    return NextResponse.json(wishlistItem);
+    console.log('Created wishlist item:', wishlistItem);
+    return NextResponse.json({
+      status: 'success',
+      message: 'Item added to wishlist',
+      item: wishlistItem
+    });
   } catch (error) {
+    console.error('Error adding to wishlist:', error);
     if (error instanceof Error) {
       return NextResponse.json(
-        { error: error.message },
+        { 
+          status: 'error',
+          error: error.message 
+        },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { error: 'Failed to add item to wishlist' },
+      { 
+        status: 'error',
+        error: 'Failed to add item to wishlist' 
+      },
       { status: 500 }
     );
   }
@@ -127,6 +151,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ message: 'Item removed from wishlist' });
   } catch (error) {
+    console.error('Error removing from wishlist:', error);
     if (error instanceof Error) {
       return NextResponse.json(
         { error: error.message },
