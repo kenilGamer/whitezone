@@ -1,54 +1,54 @@
-import bcrypt from "bcryptjs";
-import dbConnect from "@/lib/db-connect";
-import UserModel from "@/model/user";
+  import bcrypt from "bcryptjs";
+  import dbConnect from "@/lib/db-connect";
+  import UserModel from "@/model/user";
 
-export async function POST(request: Request) {
-  await dbConnect();
-  try {
-    const { username, email, password } = await request.json();
+  export async function POST(request: Request) {
+    await dbConnect();
+    try {
+      const { username, email, password } = await request.json();
 
-    const existingUserByEmail = await UserModel.findOne({
-      email,
-    });
+      const existingUserByEmail = await UserModel.findOne({
+        email,
+      });
 
-    if (existingUserByEmail) {
+      if (existingUserByEmail) {
+        return Response.json(
+          {
+            success: false,
+            message: "User already exist with this email.",
+          },
+          { status: 300 }
+        );
+      } else {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new UserModel({
+          username,
+          email,
+          password: hashedPassword,
+          role: "user",
+        });
+
+        await newUser.save();
+      }
+
+      return Response.json(
+        {
+          success: true,
+          message: "user Register successfully verify your email",
+        },
+        { status: 201 }
+      );
+    } catch (error) {
+      console.error("Error while registering user ", error);
       return Response.json(
         {
           success: false,
-          message: "User already exist with this email.",
+          message: "Error registering user",
         },
-        { status: 300 }
+        {
+          status: 500,
+        }
       );
-    } else {
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const newUser = new UserModel({
-        username,
-        email,
-        password: hashedPassword,
-        role: "user",
-      });
-
-      await newUser.save();
     }
-
-    return Response.json(
-      {
-        success: true,
-        message: "user Register successfully verify your email",
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("Error while registering user ", error);
-    return Response.json(
-      {
-        success: false,
-        message: "Error registering user",
-      },
-      {
-        status: 500,
-      }
-    );
   }
-}
