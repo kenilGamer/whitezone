@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
   const role = token?.role || "user"; // Default to "user" if no role is found
    console.log(token, role, url);
   // 🛑 Prevent authenticated users from accessing auth pages
-  if (token && ["/sign-in", "/sign-up", "/verify"].includes(url.pathname)) {
+  if (token && token.isVerified && ["/sign-in", "/sign-up", "/verify"].includes(url.pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

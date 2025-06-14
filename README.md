@@ -173,21 +173,25 @@ npm run test:coverage
 ### Build Process
 
 1. Run type checking:
+
 ```bash
 npm run type-check
 ```
 
-2. Run tests:
+1. Run tests:
+
 ```bash
 npm run test
 ```
 
-3. Build the application:
+1. Build the application:
+
 ```bash
 npm run build
 ```
 
-4. Start the production server:
+1. Start the production server:
+
 ```bash
 npm run start
 ```
