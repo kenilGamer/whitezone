@@ -185,7 +185,7 @@ const Showcase = () => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1 }}
-      className="h-[90vh] w-full flex flex-col items-center justify-center overflow-hidden relative bg-gradient-to-b from-white to-gray-50"
+      className="h-[82vh] w-full flex flex-col items-center  overflow-hidden "
       role="region"
       aria-label="Product Showcase"
     >
@@ -196,7 +196,7 @@ const Showcase = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2"
+            className="fixed  text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-cente"
             role="alert"
           >
             <FaShoppingCart className="w-5 h-5" />
@@ -241,7 +241,7 @@ const Showcase = () => {
           {response?.products?.map((product, index) => (
             <SwiperSlide
               key={product._id}
-              className="flex flex-col items-center justify-center w-full h-[80vh] bg-gradient-to-br from-[#eaf07f] to-[#f0f7b5] rounded-3xl shadow-lg transition-all duration-300 hover:shadow-2xl p-5 relative overflow-hidden group"
+              className="flex flex-col items-center justify-center w-full h-[80vh] bg-gradient-to-br from-[#f0ca7f] to-[#f7d6b5] rounded-3xl shadow-lg transition-all duration-300 hover:shadow-2xl p-5 relative overflow-hidden group"
               role="article"
               aria-label={`Product: ${product.name}`}
             >

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaShoppingCart, FaSpinner, FaCheck, FaExclamationTriangle, FaStar, FaTruck, FaShieldAlt, FaUndo, FaShare, FaSearchPlus, FaSearchMinus, FaPrint, FaChevronLeft, FaChevronRight, FaFacebook, FaTwitter, FaPinterest, FaWhatsapp, FaImage, FaInfoCircle, FaRegHeart, FaHeart as FaSolidHeart } from 'react-icons/fa';
 import Image from 'next/image';
@@ -40,9 +40,24 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
   const imageRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
-
-  const sizes = ['XS', 'S', 'M', 'L', 'XL'];
-  const colors = ['#000000', '#FF0000', '#0000FF', '#00FF00', '#FFFF00'];
+  const sizes = useMemo(() => ['XS', 'S', 'M', 'L', 'XL'], []);
+  const colors = useMemo(() => [
+    '#000000', // Black
+    '#FFFFFF', // White
+    '#FF0000', // Red
+    '#0000FF', // Blue
+    '#00FF00', // Green
+    '#FFFF00', // Yellow
+    '#FFA500', // Orange
+    '#800080', // Purple
+    '#FFC0CB', // Pink
+    '#A52A2A', // Brown
+    '#808080', // Gray
+    '#FFD700', // Gold
+    '#C0C0C0', // Silver
+    '#008080', // Teal
+    '#FF00FF'  // Magenta
+  ], []);
 
   // Helper function to validate image URL
   const isValidImageUrl = (url: string) => {
@@ -51,7 +66,19 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
 
   // Get valid image URLs with null checks
   const validImages = product?.images?.filter(isValidImageUrl) || [];
-  const currentImage = validImages[currentImageIndex] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2UyZThmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5NGEzYjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+  const currentImage = validImages[currentImageIndex] || product?.image || '/placeholder.png';
+
+  useEffect(() => {
+    if (product) {
+      setSelectedColor(colors[0]);
+      setSelectedSize(sizes[0]);
+      // Reset image state when product changes
+      setCurrentImageIndex(0);
+      setImageError(false);
+      setImageLoaded(false);
+      setIsLoading(true);
+    }
+  }, [product, colors, sizes]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -86,15 +113,6 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
   if (!product) {
     return null;
   }
-
-  const handleImageError = () => {
-    setIsLoading(false);
-    console.error('Failed to load image');
-  };
-
-  const handleImageLoad = () => {
-    setIsLoading(false);
-  };
 
   const handleThumbnailError = (index: number) => {
     setThumbnailErrors(prev => {
@@ -216,7 +234,7 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[50000] flex items-center justify-center p-4"
         onClick={onClose}
       >
         <motion.div
@@ -313,8 +331,14 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
                         className={`object-contain transition-transform duration-300 ${
                           isZoomed ? 'scale-150' : 'scale-100'
                         }`}
-                        onLoad={handleImageLoad}
-                        onError={handleImageError}
+                        onLoad={() => {
+                          setImageLoaded(true);
+                          setIsLoading(false);
+                        }}
+                        onError={() => {
+                          setImageError(true);
+                          setIsLoading(false);
+                        }}
                         priority
                         quality={90}
                       />

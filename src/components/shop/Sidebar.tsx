@@ -21,7 +21,7 @@ function Sidebar({ onSearch }: { onSearch: (query: string) => void }) {
   };
 
   return (
-    <div className="relative h-[90vh] z-[500]">
+    <div className="relative h-[90vh] z-[50] max-md:z-[500]">
       {/* Toggle Button for Sidebar */}
       <button
         className="absolute left-2 z-[500] md:hidden text-3xl text-[#FB9EC6]"

@@ -34,13 +34,16 @@ function Page() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6A5] to-[#FFE893]">
+    <div className="overflow-hidden select-none h-screen w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6A5] to-[#FFE893]">
       <Navbar 
         onCartClick={() => window.location.href = '/cart'}
         onWishlistClick={() => window.location.href = '/wishlist'}
         onProfileClick={() => window.location.href = '/profile'}
       />
-      <main className="relative">
+      <main className="relative overflow-hidden">
+        <h1 className="text-4xl md:text-5xl font-bold text-center p-1 bg-gradient-to-r from-[#FB9EC6] to-[#ff2885] bg-clip-text text-transparent">
+          Discover Our Featured Collection
+        </h1>
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
         <Showcase />
       </main>

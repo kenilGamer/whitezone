@@ -13,17 +13,11 @@ import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { addItem } from "@/redux/cartSlice";
 import { useSession } from "next-auth/react";
+import QuickViewModal from '@/components/root/QuickViewModal';
+import { Product } from '@/app/admin/types';
+import { useRouter } from "next/navigation";
 
-interface Product {
-  _id?: string;
-  id: string;
-  name: string;
-  price: string;
-  image: string;
-  category: string;
-}
-
-function Page() {
+export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
@@ -31,24 +25,38 @@ function Page() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
   const { startLoading, stopLoading, updateProgress } = useLoading();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAddingToCart, setIsAddingToCart] = useState<string | null>(null);
   const dispatch = useDispatch();
   const { data: session } = useSession();
+  const router = useRouter();
 
-  const addToCart = async (product: Product) => {
+  const handleQuickView = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleCloseQuickView = () => {
+    setSelectedProduct(null);
+  };
+
+  const handleAddToCart = async (product: Product) => {
     setIsAddingToCart(product._id || null);
     try {
-      dispatch(addItem({
-        id: product._id || product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: 1,
-        category: product.category
-      }));
-      toast.success('Added to cart', {
-        description: `${product.name} has been added to your cart.`,
-      });
+      if (session?.user) {
+        dispatch(addItem({
+          id: product._id,
+          name: product.name,
+          price: product.price.toString(),
+          image: product.image,
+          category: product.category,
+          quantity: 1
+        }));
+        toast.success('Added to cart', {
+          description: `${product.name} has been added to your cart.`,
+        });
+      } else {
+        router.push('/login');
+      }
     } catch (error: unknown) {
       console.error('Failed to add to cart:', error);
       toast.error('Failed to add to cart', {
@@ -58,6 +66,43 @@ function Page() {
       setIsAddingToCart(null);
     }
   };
+
+  // Fetch products from the API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      startLoading('Loading products...');
+      try {
+        updateProgress(30);
+        const response = await fetch("/api/products");
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+        updateProgress(60);
+        const data = await response.json();
+        updateProgress(90);
+        setProducts(data.products);
+        updateProgress(100);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (error: unknown) {
+        console.error("Error fetching products:", error);
+        toast.error('Failed to fetch products', {
+          description: error instanceof Error ? error.message : 'Please try again later.',
+        });
+      } finally {
+        stopLoading();
+      }
+    };
+
+    fetchProducts();
+  }, [startLoading, stopLoading, updateProgress]);
+
+  // Filter products based on the category query parameter and search query
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory =
+      !category || category === "All Products" || product.category.toLowerCase() === category.toLowerCase();
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const addToWishlist = async (product: Product) => {
     // Prevent multiple clicks
@@ -138,43 +183,6 @@ function Page() {
     }
   };
 
-  // Fetch products from the API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      startLoading('Loading products...');
-      try {
-        updateProgress(30);
-        const response = await fetch("/api/products");
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-        updateProgress(60);
-        const data = await response.json();
-        updateProgress(90);
-        setProducts(data.products);
-        updateProgress(100);
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } catch (error: unknown) {
-        console.error("Error fetching products:", error);
-        toast.error('Failed to fetch products', {
-          description: error instanceof Error ? error.message : 'Please try again later.',
-        });
-      } finally {
-        stopLoading();
-      }
-    };
-
-    fetchProducts();
-  }, [startLoading, stopLoading, updateProgress]);
-
-  // Filter products based on the category query parameter and search query
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory =
-      !category || category === "All Products" || product.category.toLowerCase() === category.toLowerCase();
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
   return (
     <div className="h-screen overflow-hidden w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6E0] to-[#FFE893] flex flex-col">
       <Toaster position="top-right" richColors />
@@ -243,6 +251,7 @@ function Page() {
             >
               {filteredProducts.map((product, index) => (
                 <motion.div
+                  onClick={() => handleQuickView(product)}
                   key={product._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -287,7 +296,7 @@ function Page() {
                     </p>
                     <button 
                       className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#FB9EC6] to-[#ff2885] text-white rounded-lg hover:from-[#ff2885] hover:to-[#FB9EC6] transition-all duration-300 transform hover:scale-105"
-                      onClick={() => addToCart(product)}
+                      onClick={() => handleAddToCart(product)}
                       disabled={isAddingToCart === product._id}
                     >
                       {isAddingToCart === product._id ? (
@@ -337,8 +346,13 @@ function Page() {
           )}
         </div>
       </div>
+
+      {/* Add QuickViewModal */}
+      <QuickViewModal
+        product={selectedProduct}
+        onClose={handleCloseQuickView}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 }
-
-export default Page;
