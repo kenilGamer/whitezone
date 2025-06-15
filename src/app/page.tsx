@@ -34,7 +34,7 @@ function Page() {
   };
 
   return (
-    <div className="overflow-hidden select-none h-screen w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6A5] to-[#FFE893]">
+    <div className="overflow-hidden h-screen w-full bg-gradient-to-br from-[#FFE893] via-[#FFD6A5] to-[#FFE893]">
       <Navbar 
         onCartClick={() => window.location.href = '/cart'}
         onWishlistClick={() => window.location.href = '/wishlist'}

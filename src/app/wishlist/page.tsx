@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { log } from "console";
 
 interface Product {
   _id?: string;
@@ -46,12 +47,13 @@ function Page() {
         updateProgress(60);
         const data = await response.json();
         updateProgress(90);
-        setWishlistItems(data.items);
+        setWishlistItems(data.wishlist || []);
         updateProgress(100);
         await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {
         console.error("Error fetching wishlist items:", error);
         toast.error('Failed to load wishlist');
+        setWishlistItems([]);
       } finally {
         stopLoading();
       }
@@ -70,7 +72,8 @@ function Page() {
       const response = await fetch(`/api/wishlist?userId=${session.user._id}&productId=${productId}`, {
         method: 'DELETE',
       });
-
+      console.log(response);
+      
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Failed to remove item');
@@ -147,7 +150,7 @@ function Page() {
               My Wishlist
             </h1>
             <span className="px-4 py-1 bg-[#FB9EC6]/10 text-[#FB9EC6] rounded-full text-sm font-medium">
-              {wishlistItems.length} items
+              {wishlistItems?.length || 0} items
             </span>
           </div>
         </div>
@@ -160,9 +163,9 @@ function Page() {
             exit={{ opacity: 0 }}
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
           >
-            {wishlistItems.map((item, index) => (
+            {wishlistItems?.map((item, index) => (
               <motion.div
-                key={item._id}
+                key={item._id || item.productId}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -214,7 +217,7 @@ function Page() {
         </AnimatePresence>
 
         {/* Empty State */}
-        {wishlistItems.length === 0 && (
+        {(!wishlistItems || wishlistItems.length === 0) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -22,7 +22,7 @@ export default function VerifyPage() {
       const data = await response.json();
       if (response.ok) {
         setMessage({ type: 'success', text: data.message });
-        router.push('/dashboard');
+        router.push('/');
       } else {
         setMessage({ type: 'error', text: data.message });
       }
@@ -49,7 +49,7 @@ export default function VerifyPage() {
       const data = await response.json();
       if (response.ok) {
         setMessage({ type: 'success', text: data.message });
-        router.push('/dashboard');
+        router.push('/');
       } else {
         setMessage({ type: 'error', text: data.message });
       }

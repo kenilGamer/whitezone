@@ -25,10 +25,11 @@ export default function ShopPage() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
   const { startLoading, stopLoading, updateProgress } = useLoading();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAddingToCart, setIsAddingToCart] = useState<string | null>(null);
   const dispatch = useDispatch();
   const { data: session } = useSession();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const router = useRouter();
 
   const handleQuickView = (product: Product) => {
