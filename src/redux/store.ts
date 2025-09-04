@@ -6,13 +6,15 @@ import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
 // Create a noop storage for server-side rendering
 const createNoopStorage = () => {
   return {
-    getItem(_key: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getItem(_: string) {
       return Promise.resolve(null);
     },
-    setItem(_key: string, value: any) {
+    setItem(_: string, value: unknown) {
       return Promise.resolve(value);
     },
-    removeItem(_key: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    removeItem(_: string) {
       return Promise.resolve();
     },
   };

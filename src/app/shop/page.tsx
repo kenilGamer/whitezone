@@ -29,7 +29,7 @@ export default function ShopPage() {
   const dispatch = useDispatch();
   const { data: session } = useSession();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  // const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const router = useRouter();
 
   const handleQuickView = (product: Product) => {
